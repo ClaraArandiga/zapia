@@ -81,6 +81,10 @@ export default function TermosPage() {
             comunicada previamente) via Mercado Pago. Você pode cancelar quando quiser diretamente
             no Mercado Pago; o acesso permanece ativo até o fim do período já pago.
           </p>
+          <p className={paragrafoClass}>
+            Garantia de 7 dias: se você não ficar satisfeita nos primeiros 7 dias após a primeira
+            cobrança, devolvemos o valor pago. É só entrar em contato pelo canal abaixo.
+          </p>
         </section>
 
         <section className={secaoClass}>

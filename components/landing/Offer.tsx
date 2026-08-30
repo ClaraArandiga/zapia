@@ -18,6 +18,10 @@ export function Offer() {
         <ButtonLink href="/lead" className="mt-8 w-full">
           Quero meu atendente de IA →
         </ButtonLink>
+        <p className="mt-5 flex items-center justify-center gap-2 text-sm text-white/60">
+          <span aria-hidden="true">🛡️</span> Garantia de 7 dias: não gostou, devolvemos seu
+          dinheiro.
+        </p>
       </div>
     </Section>
   );

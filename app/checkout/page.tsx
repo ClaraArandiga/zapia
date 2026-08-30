@@ -14,8 +14,7 @@ const incluso = [
 ];
 
 type Plano = "base" | "upsell" | "downsell";
-
-const PRECOS: Record<Plano, number> = { base: 47, upsell: 74, downsell: 54 };
+type Etapa = "oferta" | "downsell";
 
 function CheckoutContent() {
   const params = useSearchParams();
@@ -24,9 +23,9 @@ function CheckoutContent() {
   const [loading, setLoading] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
   const [termosAceitos, setTermosAceitos] = useState(false);
-  const [plano, setPlano] = useState<Plano>("base");
+  const [etapa, setEtapa] = useState<Etapa>("oferta");
 
-  async function iniciarPagamento() {
+  async function iniciarPagamento(plano: Plano) {
     if (!leadId) {
       setErro("Não encontramos seu cadastro. Volte e preencha o formulário novamente.");
       return;
@@ -59,132 +58,160 @@ function CheckoutContent() {
     }
   }
 
+  function quererSoAIA() {
+    if (!termosAceitos) {
+      setErro("É preciso aceitar os Termos de Uso para continuar.");
+      return;
+    }
+    setErro(null);
+    setEtapa("downsell");
+  }
+
+  const termosCheckbox = (
+    <label className="mt-8 flex items-start gap-3 text-left text-sm text-white/70">
+      <input
+        type="checkbox"
+        checked={termosAceitos}
+        onChange={(e) => setTermosAceitos(e.target.checked)}
+        className="mt-1 h-4 w-4"
+      />
+      Li e aceito os{" "}
+      <Link href="/termos" target="_blank" className="text-brand-400 hover:underline">
+        Termos de Uso
+      </Link>
+      , incluindo os limites de responsabilidade sobre respostas dadas pela IA.
+    </label>
+  );
+
   return (
     <main className="mx-auto flex min-h-screen max-w-xl flex-col items-center px-6 py-20 text-center">
       <p className="text-sm font-semibold uppercase tracking-widest text-brand-400">Passo 2 de 3</p>
-      <h1 className="mt-2 text-3xl font-bold text-white">Seu atendente de IA no WhatsApp</h1>
-      <p className="mt-4 text-white/60">
-        Configuramos uma IA personalizada para atender seus clientes automaticamente. Assinatura
-        mensal, cancele quando quiser.
-      </p>
 
-      <ul className="mt-8 flex w-full flex-col gap-3 text-left">
-        {incluso.map((item) => (
-          <li
-            key={item}
-            className="flex items-start gap-3 rounded-xl border border-white/10 bg-white/[0.03] p-4 text-sm text-white/80"
-          >
-            <span className="mt-0.5 text-brand-400">✓</span>
-            {item}
-          </li>
-        ))}
-      </ul>
-
-      <div className="mt-10 w-full text-left">
-        <p className="text-sm font-semibold uppercase tracking-widest text-brand-400">
-          Escolha seu plano
-        </p>
-
-        <button
-          type="button"
-          onClick={() => setPlano("base")}
-          className={`mt-4 w-full rounded-2xl border p-5 text-left transition ${
-            plano === "base" ? "border-brand-400 bg-brand-500/5" : "border-white/10 bg-white/[0.02]"
-          }`}
-        >
-          <div className="flex items-center justify-between">
-            <span className="font-semibold text-white">Essencial</span>
-            <span className="text-lg font-bold text-white">R$47<span className="text-sm font-normal text-white/50">/mês</span></span>
-          </div>
-          <p className="mt-1 text-sm text-white/60">
-            Seu atendente de IA respondendo clientes 24h, treinado com as informações da sua
-            empresa.
+      {etapa === "oferta" ? (
+        <>
+          <h1 className="mt-2 text-3xl font-bold text-white">Seu atendente de IA no WhatsApp</h1>
+          <p className="mt-4 text-white/60">
+            Configuramos uma IA personalizada para atender seus clientes automaticamente.
+            Assinatura mensal, cancele quando quiser.
           </p>
-        </button>
 
-        <button
-          type="button"
-          onClick={() => setPlano("upsell")}
-          className={`relative mt-4 w-full rounded-2xl border-2 p-5 text-left transition ${
-            plano === "upsell" ? "border-brand-400 bg-brand-500/10" : "border-brand-500/40 bg-brand-500/5"
-          }`}
-        >
-          <span className="absolute -top-3 left-5 rounded-full bg-brand-500 px-3 py-0.5 text-xs font-bold text-ink-900">
-            Mais escolhido
-          </span>
-          <div className="flex items-center justify-between">
-            <span className="font-semibold text-white">Essencial + Atualização e Relatório</span>
-            <span className="text-lg font-bold text-white">
-              R$74<span className="text-sm font-normal text-white/50">/mês</span>
-            </span>
-          </div>
-          <p className="mt-2 text-sm text-white/70">
-            Seu negócio muda toda semana: preço novo, produto novo, promoção de fim de semana. Sem
-            esse plano, cada atualização depende de mexer no sistema. Com ele, você mesma atualiza
-            em segundos, direto do seu painel.
-          </p>
-          <ul className="mt-3 flex flex-col gap-1.5 text-sm text-white/80">
-            <li className="flex items-start gap-2">
-              <span className="mt-0.5 text-brand-400">✓</span> Edite produtos, preços e respostas
-              quando quiser, sem esperar
-            </li>
-            <li className="flex items-start gap-2">
-              <span className="mt-0.5 text-brand-400">✓</span> Relatório semanal de desempenho no
-              seu painel: conversas, clientes atendidos, transferências
-            </li>
+          <ul className="mt-8 flex w-full flex-col gap-3 text-left">
+            {incluso.map((item) => (
+              <li
+                key={item}
+                className="flex items-start gap-3 rounded-xl border border-white/10 bg-white/[0.03] p-4 text-sm text-white/80"
+              >
+                <span className="mt-0.5 text-brand-400">✓</span>
+                {item}
+              </li>
+            ))}
           </ul>
-        </button>
 
-        <button
-          type="button"
-          onClick={() => setPlano("downsell")}
-          className={`mt-4 w-full rounded-2xl border p-5 text-left transition ${
-            plano === "downsell" ? "border-brand-400 bg-brand-500/5" : "border-white/10 bg-white/[0.02]"
-          }`}
-        >
-          <div className="flex items-center justify-between">
-            <span className="font-semibold text-white">Ou só o Relatório Semanal</span>
-            <span className="text-lg font-bold text-white">
-              R$54<span className="text-sm font-normal text-white/50">/mês</span>
-            </span>
+          <div className="mt-8 w-full rounded-2xl border border-brand-400 bg-brand-500/5 p-6 text-left">
+            <div className="flex items-center justify-between">
+              <span className="font-semibold text-white">IA no WhatsApp</span>
+              <span className="text-2xl font-bold text-white">
+                R$47<span className="text-sm font-normal text-white/50">/mês</span>
+              </span>
+            </div>
+            <p className="mt-1 text-sm text-white/60">
+              Seu atendente de IA respondendo clientes 24h, treinado com as informações da sua
+              empresa.
+            </p>
+            <p className="mt-3 flex items-center gap-2 text-xs text-white/50">
+              <span aria-hidden="true">🛡️</span> Garantia de 7 dias.
+            </p>
+            <Button onClick={quererSoAIA} disabled={loading} className="mt-4 w-full disabled:opacity-60">
+              Quero minha IA (R$47/mês) →
+            </Button>
           </div>
-          <p className="mt-1 text-sm text-white/60">
-            Não quer editar agora? Tudo bem. Pelo menos acompanhe os números: quantas pessoas seu
-            bot atendeu essa semana e quanto isso tirou de trabalho da sua equipe.
+
+          <div className="mt-6 w-full text-left">
+            <p className="text-xs font-semibold uppercase tracking-widest text-white/40">
+              Você também pode gostar
+            </p>
+            <div className="mt-3 rounded-2xl border border-white/10 bg-white/[0.02] p-5">
+              <div className="flex items-center justify-between">
+                <span className="font-semibold text-white">+ Atualização e Relatório</span>
+                <span className="text-lg font-bold text-brand-400">+R$27<span className="text-sm font-normal text-white/50">/mês</span></span>
+              </div>
+              <p className="mt-2 text-sm text-white/70">
+                Seu negócio muda toda semana: preço novo, produto novo, promoção de fim de semana.
+                Sem isso, cada atualização depende de mexer no sistema. Com esse extra, você mesma
+                atualiza em segundos, direto do seu painel, e ainda acompanha toda semana quantas
+                conversas o bot fechou.
+              </p>
+              <button
+                type="button"
+                onClick={() => iniciarPagamento("upsell")}
+                disabled={loading}
+                className="mt-4 w-full rounded-full border border-brand-400 py-3 text-sm font-semibold text-brand-400 transition hover:bg-brand-500/10 disabled:opacity-60"
+              >
+                Adicionar por +R$27/mês (R$74 no total) →
+              </button>
+            </div>
+          </div>
+
+          {status === "failure" && (
+            <p className="mt-4 text-sm text-red-400">
+              O pagamento não foi concluído. Você pode tentar novamente abaixo.
+            </p>
+          )}
+          {erro && <p className="mt-4 text-sm text-red-400">{erro}</p>}
+          {termosCheckbox}
+        </>
+      ) : (
+        <>
+          <h1 className="mt-2 text-3xl font-bold text-white">Antes de continuar...</h1>
+          <p className="mt-4 text-white/60">
+            Você optou por só a IA. Sem problema, mas que tal pelo menos acompanhar o que ela está
+            fazendo pelo seu negócio?
           </p>
-        </button>
-      </div>
 
-      {status === "failure" && (
-        <p className="mt-4 text-sm text-red-400">
-          O pagamento não foi concluído. Você pode tentar novamente abaixo.
-        </p>
+          <div className="mt-8 w-full rounded-2xl border border-brand-400 bg-brand-500/5 p-6 text-left">
+            <div className="flex items-center justify-between">
+              <span className="font-semibold text-white">+ Relatório Semanal</span>
+              <span className="text-2xl font-bold text-brand-400">
+                +R$7<span className="text-sm font-normal text-white/50">/mês</span>
+              </span>
+            </div>
+            <p className="mt-2 text-sm text-white/70">
+              Toda semana, direto no seu painel: quantas pessoas seu bot atendeu, quantas conversas
+              viraram cliente e quanto isso tirou de trabalho da sua equipe. Por menos de R$0,25 por
+              dia.
+            </p>
+            <Button
+              onClick={() => iniciarPagamento("downsell")}
+              disabled={loading}
+              className="mt-4 w-full disabled:opacity-60"
+            >
+              Sim, quero o relatório (+R$7/mês) →
+            </Button>
+          </div>
+
+          {erro && <p className="mt-4 text-sm text-red-400">{erro}</p>}
+          {termosCheckbox}
+
+          <button
+            type="button"
+            onClick={() => iniciarPagamento("base")}
+            disabled={loading}
+            className="mt-4 text-sm text-white/50 underline hover:text-white/80 disabled:opacity-60"
+          >
+            {loading ? "Redirecionando..." : "Não, quero só a IA (R$47/mês) →"}
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setEtapa("oferta")}
+            className="mt-6 text-xs text-white/30 hover:text-white/50"
+          >
+            ← Voltar
+          </button>
+        </>
       )}
-      {erro && <p className="mt-4 text-sm text-red-400">{erro}</p>}
 
-      <label className="mt-8 flex items-start gap-3 text-left text-sm text-white/70">
-        <input
-          type="checkbox"
-          checked={termosAceitos}
-          onChange={(e) => setTermosAceitos(e.target.checked)}
-          className="mt-1 h-4 w-4"
-        />
-        Li e aceito os{" "}
-        <Link href="/termos" target="_blank" className="text-brand-400 hover:underline">
-          Termos de Uso
-        </Link>
-        , incluindo os limites de responsabilidade sobre respostas dadas pela IA.
-      </label>
-
-      <Button
-        onClick={iniciarPagamento}
-        disabled={loading || !termosAceitos}
-        className="mt-4 w-full disabled:opacity-60"
-      >
-        {loading ? "Redirecionando..." : `Quero minha IA (R$${PRECOS[plano]}/mês) →`}
-      </Button>
-
-      <p className="mt-4 text-xs text-white/40">
+      <p className="mt-6 text-xs text-white/40">
         Pagamento processado com segurança pelo Mercado Pago.
       </p>
     </main>
