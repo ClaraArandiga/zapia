@@ -25,6 +25,7 @@ export async function criarAssinatura(params: {
   titulo: string;
   preco: number;
   payerEmail: string;
+  backUrl?: string;
 }) {
   const client = getClient();
   const preapproval = new PreApproval(client);
@@ -35,7 +36,7 @@ export async function criarAssinatura(params: {
       reason: params.titulo,
       external_reference: params.leadId,
       payer_email: params.payerEmail,
-      back_url: `${siteUrl}/obrigado?lead=${params.leadId}`,
+      back_url: params.backUrl ?? `${siteUrl}/obrigado?lead=${params.leadId}`,
       auto_recurring: {
         frequency: 1,
         frequency_type: "months",
@@ -56,6 +57,13 @@ export async function buscarAssinatura(preapprovalId: string) {
   const client = getClient();
   const preapproval = new PreApproval(client);
   return preapproval.get({ id: preapprovalId });
+}
+
+/** Cancela uma assinatura (usado ao trocar de plano: cancela a antiga antes de criar a nova). */
+export async function cancelarAssinatura(preapprovalId: string) {
+  const client = getClient();
+  const preapproval = new PreApproval(client);
+  return preapproval.update({ id: preapprovalId, body: { status: "cancelled" } });
 }
 
 /** Busca um pagamento pelo id (usado no webhook, para confirmar o evento). */

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getSupabaseAuthClient } from "@/lib/supabase-server";
 import { getSupabaseServiceClient } from "@/lib/supabase";
+import { BotaoUpgrade } from "@/components/painel/BotaoUpgrade";
 
 const campo = (label: string, valor: string | null | undefined) => (
   <div>
@@ -172,7 +173,13 @@ export default async function PainelPage({
         </span>
       </div>
 
-      {sucesso && (
+      {sucesso === "upgrade" && (
+        <p className="mt-4 rounded-xl border border-brand-500/30 bg-brand-500/10 p-3 text-sm text-brand-400">
+          Assinatura confirmada! O relatório aparece assim que o Mercado Pago liberar o pagamento
+          (pode levar alguns minutos).
+        </p>
+      )}
+      {sucesso && sucesso !== "upgrade" && (
         <p className="mt-4 rounded-xl border border-brand-500/30 bg-brand-500/10 p-3 text-sm text-brand-400">
           Informações atualizadas! Seu atendente já está usando os dados novos.
         </p>
@@ -278,12 +285,12 @@ export default async function PainelPage({
               {statTile("3h 40min", "tempo economizado", "⏱️")}
             </div>
             <div className="absolute inset-0 flex items-center justify-center">
-              <a
-                href="mailto:zapia.contato@gmail.com"
-                className="rounded-full bg-brand-500 px-5 py-2.5 text-sm font-semibold text-ink-900 hover:bg-brand-400"
+              <BotaoUpgrade
+                plano="upsell"
+                className="rounded-full bg-brand-500 px-5 py-2.5 text-sm font-semibold text-ink-900 hover:bg-brand-400 disabled:opacity-60"
               >
-                Desbloquear relatório →
-              </a>
+                Desbloquear relatório (+27/mês) →
+              </BotaoUpgrade>
             </div>
           </div>
         </section>
