@@ -18,10 +18,16 @@ export function Offer() {
         <ButtonLink href="/lead" className="mt-8 w-full">
           Quero meu atendente de IA →
         </ButtonLink>
-        <p className="mt-5 flex items-center justify-center gap-2 text-sm text-white/60">
-          <span aria-hidden="true">🛡️</span> Garantia de 7 dias: não gostou, devolvemos seu
-          dinheiro.
-        </p>
+        <div className="mt-5 flex flex-col items-center gap-2 text-sm text-white/60">
+          <p className="flex items-center gap-2">
+            <span aria-hidden="true">🛡️</span> Garantia de 7 dias: não gostou, devolvemos seu
+            dinheiro.
+          </p>
+          <p className="flex items-center gap-2">
+            <span aria-hidden="true">🔒</span> Pagamento processado com segurança pelo Mercado
+            Pago.
+          </p>
+        </div>
       </div>
     </Section>
   );
