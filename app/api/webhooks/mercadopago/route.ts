@@ -1,7 +1,14 @@
 import { NextResponse } from "next/server";
 import crypto from "crypto";
 import { getSupabaseServiceClient } from "@/lib/supabase";
-import { buscarPagamento } from "@/lib/mercadopago";
+import { buscarAssinatura, buscarPagamento } from "@/lib/mercadopago";
+
+/** Mapeia o status bruto do Mercado Pago para o status do lead no funil. */
+function statusAssinaturaParaLead(status: string): "pago" | "cancelado" | null {
+  if (status === "authorized") return "pago";
+  if (status === "cancelled" || status === "paused") return "cancelado";
+  return null;
+}
 
 /**
  * Valida a assinatura do webhook do Mercado Pago (header x-signature).
@@ -42,34 +49,57 @@ export async function POST(request: Request) {
     // notificações antigas (IPN) chegam só via query string
   }
 
-  const paymentId: string | undefined =
+  const entityId: string | undefined =
     body?.data?.id ?? url.searchParams.get("data.id") ?? url.searchParams.get("id") ?? undefined;
   const type: string | undefined = body?.type ?? url.searchParams.get("type") ?? url.searchParams.get("topic");
 
-  if (type !== "payment" || !paymentId) {
+  if (!entityId || (type !== "payment" && type !== "subscription_preapproval")) {
     // outros tipos de evento (ex: merchant_order) são ignorados
     return NextResponse.json({ ok: true });
   }
 
-  if (!assinaturaValida(request, paymentId)) {
+  if (!assinaturaValida(request, entityId)) {
     return NextResponse.json({ error: "assinatura inválida" }, { status: 401 });
   }
 
-  const pagamento = await buscarPagamento(paymentId);
+  const supabase = getSupabaseServiceClient();
+
+  if (type === "subscription_preapproval") {
+    const assinatura = await buscarAssinatura(entityId);
+    const leadId = assinatura.external_reference;
+    const status = assinatura.status ?? "unknown";
+    const valor = assinatura.auto_recurring?.transaction_amount ?? null;
+
+    await supabase.from("assinaturas").upsert(
+      {
+        mp_preapproval_id: String(entityId),
+        lead_id: leadId ?? null,
+        status,
+        valor,
+        raw_payload: assinatura as any,
+      },
+      { onConflict: "mp_preapproval_id" }
+    );
+
+    const novoStatusLead = statusAssinaturaParaLead(status);
+    if (leadId && novoStatusLead) {
+      await supabase.from("leads").update({ status: novoStatusLead }).eq("id", leadId);
+    }
+
+    return NextResponse.json({ ok: true });
+  }
+
+  const pagamento = await buscarPagamento(entityId);
   const leadId = pagamento.external_reference;
   const status = pagamento.status ?? "unknown";
   const valor = pagamento.transaction_amount ?? null;
-  const preferenceId = (pagamento as any).order?.id ?? null;
-
-  const supabase = getSupabaseServiceClient();
 
   await supabase
     .from("pagamentos")
     .upsert(
       {
-        mp_payment_id: String(paymentId),
+        mp_payment_id: String(entityId),
         lead_id: leadId ?? null,
-        mp_preference_id: preferenceId,
         status,
         valor,
         raw_payload: pagamento as any,
@@ -80,7 +110,7 @@ export async function POST(request: Request) {
   if (leadId && status === "approved") {
     await supabase
       .from("leads")
-      .update({ status: "pago", mp_payment_id: String(paymentId) })
+      .update({ status: "pago", mp_payment_id: String(entityId) })
       .eq("id", leadId);
   }
 

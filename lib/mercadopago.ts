@@ -1,4 +1,4 @@
-import { MercadoPagoConfig, Preference, Payment } from "mercadopago";
+import { MercadoPagoConfig, Payment, PreApproval } from "mercadopago";
 
 function getClient() {
   const accessToken = process.env.MERCADOPAGO_ACCESS_TOKEN;
@@ -11,49 +11,51 @@ function getClient() {
 }
 
 /**
- * Cria uma preferência de checkout (Checkout Pro) para um lead específico.
- * Retorna a URL (init_point) para redirecionar o cliente ao pagamento hospedado
- * pelo Mercado Pago.
+ * Cria uma assinatura (Preapproval) para cobrança mensal recorrente.
+ * Retorna a URL (init_point) para o cliente autorizar o pagamento recorrente
+ * numa página hospedada pelo Mercado Pago.
+ *
+ * Importante: diferente da Preference, o Preapproval não aceita
+ * notification_url por requisição. O webhook precisa estar configurado no
+ * painel do Mercado Pago (Developers > sua aplicação > Webhooks), assinando
+ * os tópicos "Assinaturas" (subscription_preapproval) e "Pagamentos".
  */
-export async function criarPreferenciaCheckout(params: {
+export async function criarAssinatura(params: {
   leadId: string;
   titulo: string;
   preco: number;
+  payerEmail: string;
 }) {
   const client = getClient();
-  const preference = new Preference(client);
+  const preapproval = new PreApproval(client);
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
-  // O Mercado Pago exige que back_urls.success seja uma URL pública para usar
-  // auto_return; em localhost ele rejeita a preferência, então desativamos
-  // auto_return nesse caso (o resto do fluxo funciona normalmente).
-  const isPublicUrl = !siteUrl.includes("localhost");
 
-  const result = await preference.create({
+  const result = await preapproval.create({
     body: {
-      items: [
-        {
-          id: "atendente-ia-whatsapp",
-          title: params.titulo,
-          quantity: 1,
-          unit_price: params.preco,
-          currency_id: "BRL",
-        },
-      ],
+      reason: params.titulo,
       external_reference: params.leadId,
-      back_urls: {
-        success: `${siteUrl}/obrigado?lead=${params.leadId}`,
-        pending: `${siteUrl}/obrigado?lead=${params.leadId}&status=pending`,
-        failure: `${siteUrl}/checkout?lead=${params.leadId}&status=failure`,
+      payer_email: params.payerEmail,
+      back_url: `${siteUrl}/obrigado?lead=${params.leadId}`,
+      auto_recurring: {
+        frequency: 1,
+        frequency_type: "months",
+        transaction_amount: params.preco,
+        currency_id: "BRL",
       },
-      ...(isPublicUrl ? { auto_return: "approved" as const } : {}),
-      notification_url: `${siteUrl}/api/webhooks/mercadopago`,
     },
   });
 
   return {
-    preferenceId: result.id as string,
+    preapprovalId: result.id as string,
     initPoint: result.init_point as string,
   };
+}
+
+/** Busca uma assinatura pelo id (usado no webhook, para confirmar o evento). */
+export async function buscarAssinatura(preapprovalId: string) {
+  const client = getClient();
+  const preapproval = new PreApproval(client);
+  return preapproval.get({ id: preapprovalId });
 }
 
 /** Busca um pagamento pelo id (usado no webhook, para confirmar o evento). */

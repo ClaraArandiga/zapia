@@ -7,7 +7,7 @@ const novoLeadSchema = z.object({
   empresa: z.string().min(2),
   segmento: z.string().min(2),
   whatsapp_contato: z.string().min(8),
-  email: z.string().email().optional().or(z.literal("")),
+  email: z.string().email("E-mail inválido"),
   o_que_vende: z.string().optional(),
   objetivo_bot: z.string().optional(),
   duvidas_frequentes: z.string().optional(),
@@ -30,7 +30,7 @@ export async function POST(request: Request) {
   const supabase = getSupabaseServiceClient();
   const { data, error } = await supabase
     .from("leads")
-    .insert({ ...parsed.data, email: parsed.data.email || null })
+    .insert(parsed.data)
     .select("id")
     .single();
 

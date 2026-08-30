@@ -7,7 +7,7 @@ export interface Lead {
   empresa: string;
   segmento: string;
   whatsapp_contato: string;
-  email: string | null;
+  email: string;
   o_que_vende: string | null;
   objetivo_bot: string | null;
   duvidas_frequentes: string | null;
@@ -19,12 +19,21 @@ export interface Lead {
   mp_payment_id: string | null;
 }
 
+export interface Assinatura {
+  id: string;
+  created_at: string;
+  lead_id: string | null;
+  mp_preapproval_id: string;
+  status: string;
+  valor: number | null;
+}
+
 export interface NovoLeadInput {
   nome: string;
   empresa: string;
   segmento: string;
   whatsapp_contato: string;
-  email?: string;
+  email: string;
   o_que_vende?: string;
   objetivo_bot?: string;
   duvidas_frequentes?: string;

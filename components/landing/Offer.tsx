@@ -12,8 +12,9 @@ export function Offer() {
           clientes automaticamente.
         </p>
         <p className="mt-8 text-5xl font-bold text-white">
-          R$ 47<span className="text-lg font-normal text-white/50">/config. inicial</span>
+          R$ 47<span className="text-lg font-normal text-white/50">/mês</span>
         </p>
+        <p className="mt-2 text-sm text-white/50">Cancele quando quiser.</p>
         <ButtonLink href="/lead" className="mt-8 w-full">
           Quero meu atendente de IA →
         </ButtonLink>

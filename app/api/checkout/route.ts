@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getSupabaseServiceClient } from "@/lib/supabase";
-import { criarPreferenciaCheckout } from "@/lib/mercadopago";
+import { criarAssinatura } from "@/lib/mercadopago";
 
 const checkoutSchema = z.object({
   leadId: z.string().uuid(),
@@ -18,7 +18,7 @@ export async function POST(request: Request) {
   const supabase = getSupabaseServiceClient();
   const { data: lead, error: leadError } = await supabase
     .from("leads")
-    .select("id, empresa")
+    .select("id, empresa, email")
     .eq("id", parsed.data.leadId)
     .single();
 
@@ -26,15 +26,21 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Lead não encontrado" }, { status: 404 });
   }
 
+  if (!lead.email) {
+    return NextResponse.json(
+      { error: "Este cadastro não tem e-mail, necessário para criar a assinatura" },
+      { status: 400 }
+    );
+  }
+
   const preco = Number(process.env.NEXT_PUBLIC_OFERTA_PRECO ?? "47.00");
 
-  const { preferenceId, initPoint } = await criarPreferenciaCheckout({
+  const { initPoint } = await criarAssinatura({
     leadId: lead.id,
     titulo: `ZapIA para ${lead.empresa}`,
     preco,
+    payerEmail: lead.email,
   });
-
-  await supabase.from("leads").update({ mp_preference_id: preferenceId }).eq("id", lead.id);
 
   return NextResponse.json({ initPoint });
 }

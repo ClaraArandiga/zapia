@@ -51,10 +51,11 @@ function CheckoutContent() {
     <main className="mx-auto flex min-h-screen max-w-xl flex-col items-center px-6 py-20 text-center">
       <p className="text-sm font-semibold uppercase tracking-widest text-brand-400">Passo 2 de 3</p>
       <h1 className="mt-2 text-3xl font-bold text-white">
-        Seu atendente de IA no WhatsApp por apenas R$47
+        Seu atendente de IA no WhatsApp por apenas R$47/mês
       </h1>
       <p className="mt-4 text-white/60">
-        Configuramos uma IA personalizada para atender seus clientes automaticamente.
+        Configuramos uma IA personalizada para atender seus clientes automaticamente. Assinatura
+        mensal, cancele quando quiser.
       </p>
 
       <ul className="mt-8 flex w-full flex-col gap-3 text-left">
@@ -66,7 +67,9 @@ function CheckoutContent() {
         ))}
       </ul>
 
-      <p className="mt-10 text-5xl font-bold text-white">R$ 47</p>
+      <p className="mt-10 text-5xl font-bold text-white">
+        R$ 47<span className="text-lg font-normal text-white/50">/mês</span>
+      </p>
 
       {status === "failure" && (
         <p className="mt-4 text-sm text-red-400">

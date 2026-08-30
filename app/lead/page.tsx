@@ -69,8 +69,8 @@ export default function LeadPage() {
           <input name="whatsapp_contato" required placeholder="(11) 99999-9999" className={campoClass} />
         </div>
         <div>
-          <label className={labelClass}>E-mail</label>
-          <input name="email" type="email" className={campoClass} />
+          <label className={labelClass}>E-mail *</label>
+          <input name="email" type="email" required className={campoClass} />
         </div>
         <div>
           <label className={labelClass}>O que sua empresa vende?</label>

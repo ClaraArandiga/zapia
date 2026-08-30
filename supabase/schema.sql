@@ -45,6 +45,16 @@ create table if not exists pagamentos (
   raw_payload jsonb                -- payload completo da notificação, para auditoria/depuração
 );
 
+create table if not exists assinaturas (
+  id uuid primary key default gen_random_uuid(),
+  created_at timestamptz not null default now(),
+  lead_id uuid references leads(id) on delete set null,
+  mp_preapproval_id text not null unique,
+  status text not null,            -- pending / authorized / paused / cancelled (status bruto do Mercado Pago)
+  valor numeric(10,2),
+  raw_payload jsonb                -- payload completo da notificação, para auditoria/depuração
+);
+
 create table if not exists onboarding_respostas (
   id uuid primary key default gen_random_uuid(),
   created_at timestamptz not null default now(),
@@ -135,6 +145,7 @@ create table if not exists mensagens (
 
 alter table leads enable row level security;
 alter table pagamentos enable row level security;
+alter table assinaturas enable row level security;
 alter table onboarding_respostas enable row level security;
 alter table clientes enable row level security;
 alter table empresa_config enable row level security;
