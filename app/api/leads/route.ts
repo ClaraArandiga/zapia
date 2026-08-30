@@ -14,6 +14,7 @@ const novoLeadSchema = z.object({
   tom_de_voz: z.string().optional(),
   horario_atendimento: z.string().optional(),
   instagram_ou_site: z.string().optional(),
+  website: z.string().optional(), // honeypot: campo invisível, só bots preenchem
 });
 
 export async function POST(request: Request) {
@@ -27,10 +28,17 @@ export async function POST(request: Request) {
     );
   }
 
+  if (parsed.data.website) {
+    // provavelmente um bot; finge sucesso sem gravar nada
+    return NextResponse.json({ id: "00000000-0000-0000-0000-000000000000" });
+  }
+
+  const { website, ...dadosLead } = parsed.data;
+
   const supabase = getSupabaseServiceClient();
   const { data, error } = await supabase
     .from("leads")
-    .insert(parsed.data)
+    .insert(dadosLead)
     .select("id")
     .single();
 

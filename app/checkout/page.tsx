@@ -2,6 +2,7 @@
 
 import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { Footer } from "@/components/ui/Footer";
 
@@ -18,10 +19,15 @@ function CheckoutContent() {
   const status = params.get("status");
   const [loading, setLoading] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
+  const [termosAceitos, setTermosAceitos] = useState(false);
 
   async function iniciarPagamento() {
     if (!leadId) {
       setErro("Não encontramos seu cadastro. Volte e preencha o formulário novamente.");
+      return;
+    }
+    if (!termosAceitos) {
+      setErro("É preciso aceitar os Termos de Uso para continuar.");
       return;
     }
     setLoading(true);
@@ -31,7 +37,7 @@ function CheckoutContent() {
       const res = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ leadId }),
+        body: JSON.stringify({ leadId, termosAceitos }),
       });
       const data = await res.json();
 
@@ -75,7 +81,25 @@ function CheckoutContent() {
       )}
       {erro && <p className="mt-4 text-sm text-red-400">{erro}</p>}
 
-      <Button onClick={iniciarPagamento} disabled={loading} className="mt-8 w-full disabled:opacity-60">
+      <label className="mt-8 flex items-start gap-3 text-left text-sm text-white/70">
+        <input
+          type="checkbox"
+          checked={termosAceitos}
+          onChange={(e) => setTermosAceitos(e.target.checked)}
+          className="mt-1 h-4 w-4"
+        />
+        Li e aceito os{" "}
+        <Link href="/termos" target="_blank" className="text-brand-400 hover:underline">
+          Termos de Uso
+        </Link>
+        , incluindo os limites de responsabilidade sobre respostas dadas pela IA.
+      </label>
+
+      <Button
+        onClick={iniciarPagamento}
+        disabled={loading || !termosAceitos}
+        className="mt-4 w-full disabled:opacity-60"
+      >
         {loading ? "Redirecionando..." : "Quero minha IA →"}
       </Button>
 

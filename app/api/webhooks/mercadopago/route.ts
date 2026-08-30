@@ -12,13 +12,15 @@ function statusAssinaturaParaLead(status: string): "pago" | "cancelado" | null {
 
 /**
  * Valida a assinatura do webhook do Mercado Pago (header x-signature).
- * Só é aplicada se MERCADOPAGO_WEBHOOK_SECRET estiver configurado. Sem ele,
- * o evento é processado sem validação (útil em desenvolvimento local).
+ * Em produção, MERCADOPAGO_WEBHOOK_SECRET é obrigatório. Sem ele, o evento é
+ * rejeitado (evita que qualquer pessoa forje uma notificação e libere um
+ * pagamento/assinatura sem pagar de verdade). Em desenvolvimento local,
+ * segue permissivo se a variável não estiver configurada.
  * https://www.mercadopago.com.br/developers/pt/docs/your-integrations/notifications/webhooks
  */
 function assinaturaValida(request: Request, paymentId: string): boolean {
   const secret = process.env.MERCADOPAGO_WEBHOOK_SECRET;
-  if (!secret) return true;
+  if (!secret) return process.env.NODE_ENV !== "production";
 
   const xSignature = request.headers.get("x-signature");
   const xRequestId = request.headers.get("x-request-id");

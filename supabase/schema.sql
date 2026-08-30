@@ -31,8 +31,13 @@ create table if not exists leads (
 
   -- referência ao checkout do Mercado Pago
   mp_preference_id text,
-  mp_payment_id text
+  mp_payment_id text,
+
+  termos_aceitos_em timestamptz      -- data/hora em que aceitou os Termos de Uso, antes de pagar
 );
+
+-- para bancos que já tinham a tabela `leads` antes desta coluna existir
+alter table leads add column if not exists termos_aceitos_em timestamptz;
 
 create table if not exists pagamentos (
   id uuid primary key default gen_random_uuid(),

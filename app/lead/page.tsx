@@ -99,6 +99,12 @@ export default function LeadPage() {
           <input name="instagram_ou_site" className={campoClass} />
         </div>
 
+        {/* honeypot: campo invisível para humanos; se vier preenchido, é bot */}
+        <div className="absolute left-[-9999px]" aria-hidden="true">
+          <label htmlFor="website">Não preencha este campo</label>
+          <input id="website" name="website" tabIndex={-1} autoComplete="off" />
+        </div>
+
         {erro && <p className="text-sm text-red-400">{erro}</p>}
 
         <Button type="submit" disabled={loading} className="mt-2 disabled:opacity-60">

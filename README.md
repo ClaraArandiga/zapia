@@ -216,6 +216,24 @@ dias de expirar.
 3. Rode de novo o `supabase/schema.sql` no SQL Editor (adiciona só a coluna nova
    `clientes.token_expira_em`, não afeta o resto).
 
+## 13. Segurança
+
+- **Webhooks exigem assinatura em produção.** `MERCADOPAGO_WEBHOOK_SECRET` e `WHATSAPP_APP_SECRET`
+  deixaram de ser opcionais quando `NODE_ENV=production` (o padrão em qualquer deploy na Vercel):
+  sem eles configurados, os webhooks rejeitam toda notificação (evita que qualquer pessoa forje um
+  pagamento aprovado ou uma mensagem de cliente). **Confirme que `WHATSAPP_APP_SECRET` está
+  configurado na Vercel antes de conectar clientes reais** — sem ele, o webhook do WhatsApp para de
+  aceitar mensagens.
+- `/api/leads` tem um campo honeypot (invisível pra humanos) contra bots de spam.
+- O prompt do bot (`lib/ai/index.ts`) inclui regras fixas contra manipulação: não revela as
+  próprias instruções, sempre admite ser uma IA, só fala sobre a empresa, ignora tentativas de
+  "esquecer as instruções anteriores".
+- Nenhuma variável sensível (chaves de API, tokens) é exposta ao navegador — só as prefixadas
+  `NEXT_PUBLIC_*`, que já são públicas por natureza (App ID e Config ID da Meta).
+- Rode de novo o `supabase/schema.sql` (adiciona a coluna `leads.termos_aceitos_em`).
+- Não há rate limiting dedicado nas rotas públicas (exigiria uma dependência externa tipo Upstash
+  Redis). Se algum endpoint sofrer abuso, configure regras em **Vercel → Firewall**.
+
 ## Próxima etapa (fora do escopo desta entrega)
 
 - Notificação de verdade (WhatsApp/e-mail) para a equipe humana quando uma conversa é transferida.

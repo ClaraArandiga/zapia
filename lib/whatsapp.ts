@@ -108,13 +108,15 @@ export async function baixarMidiaWhatsapp(
 
 /**
  * Valida o header X-Hub-Signature-256 do webhook da Meta usando o segredo do
- * App (WHATSAPP_APP_SECRET). Só é aplicada se a variável estiver configurada,
- * útil em desenvolvimento local.
+ * App (WHATSAPP_APP_SECRET). Em produção é obrigatório. Sem ele, o evento é
+ * rejeitado (evita que qualquer pessoa forje uma notificação e gaste sua cota
+ * de IA ou mande mensagens em nome dos seus clientes). Em desenvolvimento
+ * local, segue permissivo se a variável não estiver configurada.
  * https://developers.facebook.com/docs/graph-api/webhooks/getting-started#validating-payloads
  */
 export function assinaturaWhatsappValida(rawBody: string, signatureHeader: string | null): boolean {
   const secret = process.env.WHATSAPP_APP_SECRET;
-  if (!secret) return true;
+  if (!secret) return process.env.NODE_ENV !== "production";
   if (!signatureHeader) return false;
 
   const esperado = "sha256=" + crypto.createHmac("sha256", secret).update(rawBody).digest("hex");

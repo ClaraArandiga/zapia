@@ -5,6 +5,9 @@ import { criarAssinatura } from "@/lib/mercadopago";
 
 const checkoutSchema = z.object({
   leadId: z.string().uuid(),
+  termosAceitos: z.literal(true, {
+    errorMap: () => ({ message: "É preciso aceitar os Termos de Uso" }),
+  }),
 });
 
 export async function POST(request: Request) {
@@ -12,7 +15,7 @@ export async function POST(request: Request) {
   const parsed = checkoutSchema.safeParse(body);
 
   if (!parsed.success) {
-    return NextResponse.json({ error: "leadId inválido" }, { status: 400 });
+    return NextResponse.json({ error: "Dados inválidos ou termos não aceitos" }, { status: 400 });
   }
 
   const supabase = getSupabaseServiceClient();
@@ -32,6 +35,11 @@ export async function POST(request: Request) {
       { status: 400 }
     );
   }
+
+  await supabase
+    .from("leads")
+    .update({ termos_aceitos_em: new Date().toISOString() })
+    .eq("id", lead.id);
 
   const preco = Number(process.env.NEXT_PUBLIC_OFERTA_PRECO ?? "47.00");
 
