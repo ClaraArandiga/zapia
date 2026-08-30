@@ -91,13 +91,15 @@ function CheckoutContent() {
             </p>
             <div className="mt-3 rounded-2xl border-2 border-brand-400 bg-brand-500/10 p-6">
               <div className="flex items-center justify-between">
-                <span className="font-semibold text-white">+ Atualização e Relatório</span>
+                <span className="font-semibold text-white">Tenha sua IA Sempre Atualizada &amp; Relatórios</span>
                 <span className="text-2xl font-bold text-brand-400">
                   +27<span className="text-sm font-normal text-white/50">/mês</span>
                 </span>
               </div>
               <p className="mt-2 text-sm text-white/70">
-                Edite seu bot quando quiser e acompanhe o desempenho toda semana.
+                Edite sua IA quando quiser e acompanhe, toda semana, o que está funcionando e onde
+                você pode vender ainda mais com relatórios completos do que seu atendente fez por
+                você.
               </p>
               <button
                 type="button"
