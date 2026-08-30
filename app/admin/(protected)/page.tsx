@@ -36,6 +36,7 @@ export default async function AdminLeadsPage() {
               <th className="px-4 py-3 font-medium">E-mail</th>
               <th className="px-4 py-3 font-medium">Status</th>
               <th className="px-4 py-3 font-medium">Cadastro</th>
+              <th className="px-4 py-3 font-medium"></th>
             </tr>
           </thead>
           <tbody>
@@ -58,11 +59,19 @@ export default async function AdminLeadsPage() {
                 <td className="px-4 py-3 text-white/50">
                   {new Date(lead.created_at).toLocaleDateString("pt-BR")}
                 </td>
+                <td className="px-4 py-3 text-right">
+                  <Link
+                    href={`/admin/leads/${lead.id}`}
+                    className="inline-block rounded-full border border-white/15 px-3 py-1.5 text-xs font-medium text-white hover:border-brand-400 hover:text-brand-400"
+                  >
+                    Ver detalhes →
+                  </Link>
+                </td>
               </tr>
             ))}
             {!leads?.length && (
               <tr>
-                <td colSpan={5} className="px-4 py-8 text-center text-white/40">
+                <td colSpan={6} className="px-4 py-8 text-center text-white/40">
                   Nenhum lead ainda.
                 </td>
               </tr>
