@@ -289,7 +289,7 @@ export default async function PainelPage({
                 plano="upsell"
                 className="rounded-full bg-brand-500 px-5 py-2.5 text-sm font-semibold text-ink-900 hover:bg-brand-400 disabled:opacity-60"
               >
-                Desbloquear relatório (+27/mês) →
+                Desbloquear relatório (27/mês) →
               </BotaoUpgrade>
             </div>
           </div>
