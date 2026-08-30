@@ -2,6 +2,7 @@
 
 import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
+import Link from "next/link";
 import { ButtonLink } from "@/components/ui/Button";
 
 function ObrigadoContent() {
@@ -23,10 +24,19 @@ function ObrigadoContent() {
           : "Agora vamos configurar sua IA. Precisamos de mais alguns detalhes técnicos sobre o WhatsApp e o funcionamento do seu atendimento."}
       </p>
 
-      {leadId && (
+      {leadId ? (
         <ButtonLink href={`/onboarding?lead=${leadId}`} className="mt-8">
           Continuar para configuração →
         </ButtonLink>
+      ) : (
+        <div className="mt-8 rounded-xl border border-white/10 bg-white/5 px-6 py-4 text-sm text-white/60">
+          Não encontramos seu cadastro automaticamente. Confira o e-mail de confirmação do Mercado
+          Pago com o link de continuação, ou{" "}
+          <Link href="/lead" className="text-brand-400 hover:underline">
+            preencha o formulário novamente
+          </Link>
+          .
+        </div>
       )}
     </main>
   );

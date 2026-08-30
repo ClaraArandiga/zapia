@@ -67,10 +67,6 @@ function CheckoutContent() {
         ))}
       </ul>
 
-      <p className="mt-10 text-5xl font-bold text-white">
-        R$ 47<span className="text-lg font-normal text-white/50">/mês</span>
-      </p>
-
       {status === "failure" && (
         <p className="mt-4 text-sm text-red-400">
           O pagamento não foi concluído. Você pode tentar novamente abaixo.
