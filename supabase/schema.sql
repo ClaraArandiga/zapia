@@ -89,8 +89,12 @@ create table if not exists clientes (
   whatsapp_phone_number_id text,   -- Phone Number ID (Meta)
   whatsapp_business_account_id text,
   whatsapp_access_token text,      -- idealmente migrar para um cofre de segredos (ex: Supabase Vault)
+  token_expira_em timestamptz,     -- quando o token de longa duração precisa ser renovado
   ativo boolean not null default true
 );
+
+-- para bancos que já tinham a tabela `clientes` antes desta coluna existir
+alter table clientes add column if not exists token_expira_em timestamptz;
 
 create table if not exists empresa_config (
   cliente_id uuid primary key references clientes(id) on delete cascade,

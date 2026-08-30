@@ -192,12 +192,33 @@ Signup. Quando estiver pronta para clientes reais fora dessa lista, submeta o Ap
 pedindo as permissões `whatsapp_business_management` e `whatsapp_business_messaging` (a Meta pode
 pedir um vídeo curto mostrando o fluxo).
 
+## 11. Painel admin: cadastrar clientes manualmente
+
+Além dos leads, `/admin/clientes` agora lista, cria e edita clientes direto pela interface (sem
+precisar de SQL). Cada cliente tem um botão **"Gerar prompt"**: preenche produtos/FAQ em texto
+livre, clica, e o prompt final (o que a IA realmente usa) aparece numa caixa editável — pode
+ajustar à mão antes de salvar. Isso serve tanto para clientes que vieram do Embedded Signup quanto
+para testes manuais (nesse caso preencha `whatsapp_phone_number_id`/`whatsapp_access_token` com os
+dados do número de teste do passo 9.1, no lugar do SQL da seção 9.4).
+
+## 12. Renovação automática do token do WhatsApp
+
+O token obtido no Embedded Signup (seção 10) já é trocado por um de longa duração (~60 dias) na
+hora da conexão. Para não expirar depois, um Vercel Cron Job diário (`vercel.json`, chama
+`/api/cron/renovar-tokens`) renova automaticamente o token de qualquer cliente ativo a menos de 7
+dias de expirar.
+
+1. Gere um valor aleatório qualquer para `CRON_SECRET` e configure na Vercel (**Project Settings →
+   Environment Variables**) — a própria Vercel manda esse valor sozinha no header quando o cron
+   dispara, não precisa fazer nada além de configurar a variável.
+2. Depois do primeiro deploy com `vercel.json`, o cron aparece em **Project Settings → Cron Jobs**
+   na Vercel.
+3. Rode de novo o `supabase/schema.sql` no SQL Editor (adiciona só a coluna nova
+   `clientes.token_expira_em`, não afeta o resto).
+
 ## Próxima etapa (fora do escopo desta entrega)
 
-- Suporte a mensagens de mídia (áudio, imagem) no webhook, hoje só texto.
-- Renovação automática do token de acesso do WhatsApp (o token trocado no Embedded Signup tem
-  validade limitada).
-- Expandir o painel admin para gerenciar `clientes`, `produtos` e `faq` diretamente pela interface
-  (hoje o prompt vem do texto livre do formulário de implantação).
 - Notificação de verdade (WhatsApp/e-mail) para a equipe humana quando uma conversa é transferida.
 - App Review da Meta, para conectar clientes reais além da lista de testers.
+- Gerenciar `produtos`/`faq` como itens estruturados no admin (hoje é texto livre dentro do
+  gerador de prompt).

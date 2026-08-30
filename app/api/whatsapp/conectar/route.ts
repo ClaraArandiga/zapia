@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getSupabaseServiceClient } from "@/lib/supabase";
+import { trocarPorTokenLongaDuracao } from "@/lib/whatsapp";
 
 const conectarSchema = z.object({
   leadId: z.string().uuid(),
@@ -45,13 +46,26 @@ export async function POST(request: Request) {
   }
 
   const tokenData = await tokenRes.json();
-  const accessToken: string | undefined = tokenData.access_token;
+  const accessTokenCurto: string | undefined = tokenData.access_token;
 
-  if (!accessToken) {
+  if (!accessTokenCurto) {
     return NextResponse.json(
       { error: "Não foi possível confirmar a conexão com a Meta" },
       { status: 502 }
     );
+  }
+
+  // troca imediatamente por um token de longa duração (~60 dias), pra não
+  // precisar reconectar toda hora; a renovação automática cuida do resto
+  let accessToken = accessTokenCurto;
+  let tokenExpiraEm: string | null = null;
+
+  try {
+    const longaDuracao = await trocarPorTokenLongaDuracao(accessTokenCurto);
+    accessToken = longaDuracao.accessToken;
+    tokenExpiraEm = longaDuracao.expiraEm;
+  } catch (err) {
+    console.error("Erro ao trocar por token de longa duração, usando o de curta duração:", err);
   }
 
   // inscreve o app no webhook desse WhatsApp Business Account, senão a Meta
@@ -87,6 +101,7 @@ export async function POST(request: Request) {
     whatsapp_phone_number_id: phoneNumberId,
     whatsapp_business_account_id: wabaId,
     whatsapp_access_token: accessToken,
+    token_expira_em: tokenExpiraEm,
     ativo: true,
   };
 

@@ -1,8 +1,10 @@
 import { NextResponse } from "next/server";
 import { getSupabaseServiceClient } from "@/lib/supabase";
-import { assinaturaWhatsappValida, enviarMensagemWhatsapp } from "@/lib/whatsapp";
+import { assinaturaWhatsappValida, baixarMidiaWhatsapp, enviarMensagemWhatsapp } from "@/lib/whatsapp";
 import { getAIProvider, montarPromptSistema, TAG_TRANSFERIR_HUMANO } from "@/lib/ai";
 import type { MensagemConversa } from "@/lib/ai";
+
+const TIPOS_SUPORTADOS = ["text", "image", "audio"];
 
 /** Handshake de verificação do webhook, chamado uma vez ao configurar no painel da Meta. */
 export async function GET(request: Request) {
@@ -36,8 +38,8 @@ export async function POST(request: Request) {
   const mensagem = value?.messages?.[0];
   const phoneNumberId = value?.metadata?.phone_number_id;
 
-  if (!mensagem || !phoneNumberId || mensagem.type !== "text") {
-    // status de entrega, mensagens de mídia (fora do escopo por enquanto) etc.
+  if (!mensagem || !phoneNumberId || !TIPOS_SUPORTADOS.includes(mensagem.type)) {
+    // status de entrega, tipos ainda não suportados (localização, figurinha etc.) etc.
     return NextResponse.json({ ok: true });
   }
 
@@ -56,8 +58,27 @@ export async function POST(request: Request) {
   }
 
   const numeroClienteFinal: string = mensagem.from;
-  const textoRecebido: string = mensagem.text?.body ?? "";
   const whatsappMessageId: string = mensagem.id;
+
+  let textoRecebido = mensagem.text?.body ?? "";
+  let midiaRecebida: { mimeType: string; dadosBase64: string } | undefined;
+
+  if (mensagem.type === "image" || mensagem.type === "audio") {
+    const mediaId = mensagem[mensagem.type]?.id;
+    const rotulo = mensagem.type === "image" ? "imagem" : "áudio";
+
+    if (mediaId) {
+      try {
+        midiaRecebida = await baixarMidiaWhatsapp(mediaId, cliente.whatsapp_access_token);
+        textoRecebido = `[${rotulo} enviado pelo cliente]`;
+      } catch (err) {
+        console.error(`Erro ao baixar ${rotulo} do WhatsApp:`, err);
+        textoRecebido = `[${rotulo} enviado pelo cliente, não consegui abrir]`;
+      }
+    } else {
+      textoRecebido = `[${rotulo} enviado pelo cliente]`;
+    }
+  }
 
   // idempotência: a Meta pode reenviar a mesma notificação mais de uma vez
   const { data: jaProcessada } = await supabase
@@ -153,6 +174,12 @@ export async function POST(request: Request) {
   const historico: MensagemConversa[] = (historicoMensagens ?? [])
     .reverse()
     .map((m) => ({ autor: m.remetente === "bot" ? "bot" : "cliente", texto: m.texto }));
+
+  // a mídia baixada só vale pra essa rodada; não fica salva no banco nem se repete
+  // nas próximas chamadas (a última entrada é sempre a mensagem que acabamos de gravar)
+  if (midiaRecebida && historico.length) {
+    historico[historico.length - 1].midia = midiaRecebida;
+  }
 
   let respostaTexto: string;
   let precisaTransferir = false;

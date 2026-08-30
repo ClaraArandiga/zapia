@@ -14,7 +14,12 @@ export const geminiProvider: AIProvider = {
 
     const contents = historico.map((m) => ({
       role: m.autor === "bot" ? "model" : "user",
-      parts: [{ text: m.texto }],
+      parts: [
+        ...(m.midia
+          ? [{ inline_data: { mime_type: m.midia.mimeType, data: m.midia.dadosBase64 } }]
+          : []),
+        { text: m.texto },
+      ],
     }));
 
     const res = await fetch(

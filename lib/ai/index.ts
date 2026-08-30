@@ -12,6 +12,8 @@ export const TAG_TRANSFERIR_HUMANO = "[[TRANSFERIR_HUMANO]]";
 export interface MensagemConversa {
   autor: "cliente" | "bot";
   texto: string;
+  /** Presente só na mensagem recém-recebida quando é imagem/áudio (não persistido no histórico). */
+  midia?: { mimeType: string; dadosBase64: string };
 }
 
 export interface ContextoEmpresa {

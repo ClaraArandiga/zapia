@@ -45,3 +45,83 @@ export async function atualizarStatusLead(formData: FormData) {
   revalidatePath(`/admin/leads/${leadId}`);
   revalidatePath("/admin");
 }
+
+async function exigirSessaoAdmin() {
+  const supabase = await getSupabaseAuthClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect("/admin/login");
+  }
+}
+
+const campoOuNull = (formData: FormData, nome: string) => {
+  const valor = String(formData.get(nome) ?? "").trim();
+  return valor || null;
+};
+
+export async function salvarCliente(formData: FormData) {
+  await exigirSessaoAdmin();
+
+  const id = String(formData.get("id") ?? "").trim();
+  const service = getSupabaseServiceClient();
+
+  const dadosCliente = {
+    nome_empresa: String(formData.get("nome_empresa") ?? ""),
+    segmento: campoOuNull(formData, "segmento"),
+    whatsapp_phone_number_id: campoOuNull(formData, "whatsapp_phone_number_id"),
+    whatsapp_business_account_id: campoOuNull(formData, "whatsapp_business_account_id"),
+    whatsapp_access_token: campoOuNull(formData, "whatsapp_access_token"),
+    ativo: formData.get("ativo") === "on",
+  };
+
+  let clienteId = id;
+
+  if (id) {
+    await service.from("clientes").update(dadosCliente).eq("id", id);
+  } else {
+    const { data: novoCliente, error } = await service
+      .from("clientes")
+      .insert(dadosCliente)
+      .select("id")
+      .single();
+
+    if (error || !novoCliente) {
+      redirect("/admin/clientes/novo?erro=" + encodeURIComponent("Não foi possível criar o cliente"));
+    }
+
+    clienteId = novoCliente.id;
+  }
+
+  await service.from("empresa_config").upsert(
+    {
+      cliente_id: clienteId,
+      tom_de_voz: campoOuNull(formData, "tom_de_voz"),
+      horario_atendimento: campoOuNull(formData, "horario_atendimento"),
+      endereco_localizacao: campoOuNull(formData, "endereco_localizacao"),
+      formas_pagamento: campoOuNull(formData, "formas_pagamento"),
+      politica_troca_cancelamento: campoOuNull(formData, "politica_troca_cancelamento"),
+      quando_transferir_humano: campoOuNull(formData, "quando_transferir_humano"),
+      contato_equipe_humana: campoOuNull(formData, "contato_equipe_humana"),
+      prompt_sistema: campoOuNull(formData, "prompt_sistema"),
+    },
+    { onConflict: "cliente_id" }
+  );
+
+  revalidatePath("/admin/clientes");
+  revalidatePath(`/admin/clientes/${clienteId}`);
+  redirect(`/admin/clientes/${clienteId}`);
+}
+
+export async function excluirCliente(formData: FormData) {
+  await exigirSessaoAdmin();
+
+  const id = String(formData.get("id") ?? "");
+  const service = getSupabaseServiceClient();
+  await service.from("clientes").delete().eq("id", id);
+
+  revalidatePath("/admin/clientes");
+  redirect("/admin/clientes");
+}
