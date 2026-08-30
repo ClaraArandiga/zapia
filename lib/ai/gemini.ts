@@ -1,6 +1,6 @@
 import type { AIProvider, ContextoEmpresa, MensagemConversa } from "./index";
 
-const MODELO_PADRAO = "gemini-2.0-flash";
+const MODELO_PADRAO = "gemini-3.6-flash";
 
 /** Provedor Google Gemini (plano gratuito). Chamada direta via REST, sem SDK. */
 export const geminiProvider: AIProvider = {
@@ -28,7 +28,11 @@ export const geminiProvider: AIProvider = {
         body: JSON.stringify({
           system_instruction: { parts: [{ text: contexto.promptSistema }] },
           contents,
-          generationConfig: { maxOutputTokens: 500 },
+          generationConfig: {
+            maxOutputTokens: 500,
+            // Atendimento simples não precisa de raciocínio longo; reduz custo/latência.
+            thinkingConfig: { thinkingLevel: "low" },
+          },
         }),
       }
     );
