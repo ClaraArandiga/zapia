@@ -8,7 +8,17 @@ const checkoutSchema = z.object({
   termosAceitos: z.literal(true, {
     errorMap: () => ({ message: "É preciso aceitar os Termos de Uso" }),
   }),
+  plano: z.enum(["base", "upsell", "downsell"]).default("base"),
 });
+
+// Fonte da verdade dos preços fica no servidor. Nunca confiar num valor vindo do cliente.
+const PRECOS: Record<string, number> = { base: 47, upsell: 74, downsell: 54 };
+
+const TITULOS: Record<string, string> = {
+  base: "ZapIA",
+  upsell: "ZapIA + Atualização e Relatório",
+  downsell: "ZapIA + Relatório Semanal",
+};
 
 export async function POST(request: Request) {
   const body = await request.json();
@@ -38,14 +48,17 @@ export async function POST(request: Request) {
 
   await supabase
     .from("leads")
-    .update({ termos_aceitos_em: new Date().toISOString() })
+    .update({
+      termos_aceitos_em: new Date().toISOString(),
+      plano_contratado: parsed.data.plano,
+    })
     .eq("id", lead.id);
 
-  const preco = Number(process.env.NEXT_PUBLIC_OFERTA_PRECO ?? "47.00");
+  const preco = PRECOS[parsed.data.plano];
 
   const { initPoint } = await criarAssinatura({
     leadId: lead.id,
-    titulo: `ZapIA para ${lead.empresa}`,
+    titulo: `${TITULOS[parsed.data.plano]} para ${lead.empresa}`,
     preco,
     payerEmail: lead.email,
   });

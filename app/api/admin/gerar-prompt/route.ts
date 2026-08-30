@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getSupabaseAuthClient } from "@/lib/supabase-server";
+import { getSupabaseAuthClient, ehEmailAdmin } from "@/lib/supabase-server";
 import { montarPromptSistema } from "@/lib/ai";
 
 export async function POST(request: Request) {
@@ -8,7 +8,7 @@ export async function POST(request: Request) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user) {
+  if (!ehEmailAdmin(user?.email)) {
     return NextResponse.json({ error: "não autorizado" }, { status: 401 });
   }
 

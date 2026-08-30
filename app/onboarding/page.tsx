@@ -28,10 +28,24 @@ function OnboardingContent() {
       setErro("Conecte seu WhatsApp Business antes de continuar.");
       return;
     }
+
+    const form = new FormData(e.currentTarget);
+    const senha = String(form.get("senha") ?? "");
+    const confirmarSenha = String(form.get("confirmar_senha") ?? "");
+
+    if (senha.length < 8) {
+      setErro("A senha do painel precisa ter pelo menos 8 caracteres.");
+      return;
+    }
+    if (senha !== confirmarSenha) {
+      setErro("As senhas não coincidem.");
+      return;
+    }
+
     setLoading(true);
     setErro(null);
 
-    const form = new FormData(e.currentTarget);
+    form.delete("confirmar_senha");
     const payload = {
       lead_id: leadId,
       autorizou_meta: whatsappConectado,
@@ -113,6 +127,28 @@ function OnboardingContent() {
         <div>
           <label className={labelClass}>Observações</label>
           <textarea name="observacoes" rows={2} className={campoClass} />
+        </div>
+
+        <div className="rounded-xl border border-brand-500/30 bg-brand-500/5 p-4">
+          <p className="text-sm font-semibold text-brand-400">Crie o acesso ao seu painel</p>
+          <p className="mt-1 text-xs text-white/50">
+            Com esse login você acompanha o que seu atendente está fazendo e revisa as
+            configurações sempre que quiser.
+          </p>
+          <div className="mt-4">
+            <label className={labelClass}>E-mail de acesso *</label>
+            <input name="email_painel" type="email" required className={campoClass} />
+          </div>
+          <div className="mt-4 grid gap-4 sm:grid-cols-2">
+            <div>
+              <label className={labelClass}>Senha *</label>
+              <input name="senha" type="password" required minLength={8} className={campoClass} />
+            </div>
+            <div>
+              <label className={labelClass}>Confirmar senha *</label>
+              <input name="confirmar_senha" type="password" required minLength={8} className={campoClass} />
+            </div>
+          </div>
         </div>
 
         {erro && <p className="text-sm text-red-400">{erro}</p>}

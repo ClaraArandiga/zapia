@@ -16,6 +16,8 @@ const onboardingSchema = z.object({
   quando_transferir_humano: z.string().optional(),
   contato_equipe_humana: z.string().optional(),
   observacoes: z.string().optional(),
+  email_painel: z.string().email(),
+  senha: z.string().min(8),
 });
 
 export async function POST(request: Request) {
@@ -48,7 +50,9 @@ export async function POST(request: Request) {
     );
   }
 
-  const { error } = await supabase.from("onboarding_respostas").insert(parsed.data);
+  const { email_painel, senha, ...respostas } = parsed.data;
+
+  const { error } = await supabase.from("onboarding_respostas").insert(respostas);
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
@@ -87,10 +91,27 @@ export async function POST(request: Request) {
           politica_troca_cancelamento: parsed.data.politica_troca_cancelamento ?? null,
           quando_transferir_humano: parsed.data.quando_transferir_humano ?? null,
           contato_equipe_humana: parsed.data.contato_equipe_humana ?? null,
+          produtos_servicos: parsed.data.produtos_servicos ?? null,
+          faq: parsed.data.faq ?? null,
           prompt_sistema: promptSistema,
         },
         { onConflict: "cliente_id" }
       );
+
+    // cria o login do painel do cliente (/painel) e vincula à linha do cliente
+    const { data: novoUsuario, error: erroUsuario } = await supabase.auth.admin.createUser({
+      email: email_painel,
+      password: senha,
+      email_confirm: true,
+    });
+
+    if (erroUsuario) {
+      // não bloqueia a conclusão do onboarding por causa disso (ex: e-mail já
+      // cadastrado numa tentativa anterior); fica registrado pra investigar
+      console.error("Erro ao criar login do painel do cliente:", erroUsuario);
+    } else if (novoUsuario.user) {
+      await supabase.from("clientes").update({ user_id: novoUsuario.user.id }).eq("id", cliente.id);
+    }
   }
 
   return NextResponse.json({ ok: true });

@@ -1,9 +1,10 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { getSupabaseAuthClient, ehEmailAdmin } from "@/lib/supabase-server";
-import { signOut } from "@/app/admin/actions";
+import { getSupabaseAuthClient } from "@/lib/supabase-server";
+import { getSupabaseServiceClient } from "@/lib/supabase";
+import { signOut } from "@/app/painel/actions";
 
-export default async function AdminProtectedLayout({
+export default async function PainelProtectedLayout({
   children,
 }: {
   children: React.ReactNode;
@@ -13,9 +14,20 @@ export default async function AdminProtectedLayout({
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user || !ehEmailAdmin(user.email)) {
-    if (user) await supabase.auth.signOut();
-    redirect(`/admin/login?erro=${encodeURIComponent("Acesso restrito à administradora.")}`);
+  if (!user) {
+    redirect("/painel/login");
+  }
+
+  const service = getSupabaseServiceClient();
+  const { data: cliente } = await service
+    .from("clientes")
+    .select("id, nome_empresa")
+    .eq("user_id", user.id)
+    .maybeSingle();
+
+  if (!cliente) {
+    await supabase.auth.signOut();
+    redirect(`/painel/login?erro=${encodeURIComponent("Conta não encontrada.")}`);
   }
 
   return (
@@ -24,18 +36,14 @@ export default async function AdminProtectedLayout({
         <div className="flex items-center gap-8">
           <span className="text-lg font-bold text-white">
             Zap<span className="text-brand-400">IA</span>{" "}
-            <span className="font-normal text-white/40">admin</span>
+            <span className="font-normal text-white/40">painel</span>
           </span>
-          <nav className="flex items-center gap-4 text-sm text-white/60">
-            <Link href="/admin" className="hover:text-white">
-              Leads
-            </Link>
-            <Link href="/admin/clientes" className="hover:text-white">
-              Clientes
-            </Link>
-          </nav>
+          <span className="text-sm text-white/50">{cliente.nome_empresa}</span>
         </div>
         <div className="flex items-center gap-4 text-sm text-white/60">
+          <Link href="/painel" className="hover:text-white">
+            Início
+          </Link>
           <span>{user.email}</span>
           <form action={signOut}>
             <button
@@ -47,7 +55,7 @@ export default async function AdminProtectedLayout({
           </form>
         </div>
       </header>
-      <main className="mx-auto max-w-5xl px-6 py-10">{children}</main>
+      <main className="mx-auto max-w-3xl px-6 py-10">{children}</main>
     </div>
   );
 }

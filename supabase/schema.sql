@@ -28,6 +28,7 @@ create table if not exists leads (
 
   -- estado do funil
   status text not null default 'novo' check (status in ('novo', 'pago', 'implantado', 'cancelado')),
+  plano_contratado text not null default 'base' check (plano_contratado in ('base', 'downsell', 'upsell')),
 
   -- referência ao checkout do Mercado Pago
   mp_preference_id text,
@@ -36,8 +37,12 @@ create table if not exists leads (
   termos_aceitos_em timestamptz      -- data/hora em que aceitou os Termos de Uso, antes de pagar
 );
 
--- para bancos que já tinham a tabela `leads` antes desta coluna existir
+-- para bancos que já tinham a tabela `leads` antes destas colunas existirem
 alter table leads add column if not exists termos_aceitos_em timestamptz;
+alter table leads add column if not exists plano_contratado text not null default 'base';
+alter table leads drop constraint if exists leads_plano_contratado_check;
+alter table leads add constraint leads_plano_contratado_check
+  check (plano_contratado in ('base', 'downsell', 'upsell'));
 
 create table if not exists pagamentos (
   id uuid primary key default gen_random_uuid(),
@@ -88,6 +93,7 @@ create table if not exists clientes (
   id uuid primary key default gen_random_uuid(),
   created_at timestamptz not null default now(),
   lead_id uuid references leads(id) on delete set null,
+  user_id uuid unique references auth.users(id) on delete set null, -- login do painel do cliente (/painel)
 
   nome_empresa text not null,
   segmento text,
@@ -98,8 +104,9 @@ create table if not exists clientes (
   ativo boolean not null default true
 );
 
--- para bancos que já tinham a tabela `clientes` antes desta coluna existir
+-- para bancos que já tinham a tabela `clientes` antes destas colunas existirem
 alter table clientes add column if not exists token_expira_em timestamptz;
+alter table clientes add column if not exists user_id uuid unique references auth.users(id) on delete set null;
 
 create table if not exists empresa_config (
   cliente_id uuid primary key references clientes(id) on delete cascade,
@@ -110,8 +117,14 @@ create table if not exists empresa_config (
   politica_troca_cancelamento text,
   quando_transferir_humano text,
   contato_equipe_humana text,
+  produtos_servicos text,          -- texto livre, reexibido no painel do cliente pra editar
+  faq text,                        -- idem
   prompt_sistema text              -- prompt final gerado a partir dessas informações
 );
+
+-- para bancos que já tinham a tabela `empresa_config` antes destas colunas existirem
+alter table empresa_config add column if not exists produtos_servicos text;
+alter table empresa_config add column if not exists faq text;
 
 create table if not exists produtos (
   id uuid primary key default gen_random_uuid(),

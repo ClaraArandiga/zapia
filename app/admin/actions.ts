@@ -2,7 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import { getSupabaseAuthClient } from "@/lib/supabase-server";
+import { getSupabaseAuthClient, ehEmailAdmin } from "@/lib/supabase-server";
 import { getSupabaseServiceClient } from "@/lib/supabase";
 import type { LeadStatus } from "@/lib/types";
 
@@ -13,7 +13,8 @@ export async function signIn(formData: FormData) {
   const supabase = await getSupabaseAuthClient();
   const { error } = await supabase.auth.signInWithPassword({ email, password: senha });
 
-  if (error) {
+  if (error || !ehEmailAdmin(email)) {
+    await supabase.auth.signOut();
     redirect(`/admin/login?erro=${encodeURIComponent("E-mail ou senha inválidos")}`);
   }
 
@@ -27,14 +28,7 @@ export async function signOut() {
 }
 
 export async function atualizarStatusLead(formData: FormData) {
-  const supabase = await getSupabaseAuthClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect("/admin/login");
-  }
+  await exigirSessaoAdmin();
 
   const leadId = String(formData.get("leadId") ?? "");
   const status = String(formData.get("status") ?? "") as LeadStatus;
@@ -52,7 +46,7 @@ async function exigirSessaoAdmin() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user) {
+  if (!user || !ehEmailAdmin(user.email)) {
     redirect("/admin/login");
   }
 }

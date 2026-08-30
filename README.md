@@ -230,9 +230,40 @@ dias de expirar.
   "esquecer as instruções anteriores".
 - Nenhuma variável sensível (chaves de API, tokens) é exposta ao navegador — só as prefixadas
   `NEXT_PUBLIC_*`, que já são públicas por natureza (App ID e Config ID da Meta).
-- Rode de novo o `supabase/schema.sql` (adiciona a coluna `leads.termos_aceitos_em`).
 - Não há rate limiting dedicado nas rotas públicas (exigiria uma dependência externa tipo Upstash
   Redis). Se algum endpoint sofrer abuso, configure regras em **Vercel → Firewall**.
+- **`ADMIN_EMAILS` (obrigatório)**: como agora clientes também têm login no mesmo projeto Supabase
+  Auth (painel deles, ver seção 15), `/admin` deixou de liberar acesso pra qualquer sessão válida —
+  só e-mails dessa lista (separados por vírgula) entram. Configure com o seu próprio e-mail antes
+  do deploy, senão ninguém (nem você) acessa o admin.
+- Rode de novo o `supabase/schema.sql` (novas colunas: `leads.termos_aceitos_em`,
+  `leads.plano_contratado`, `clientes.user_id`, `empresa_config.produtos_servicos`/`faq`).
+
+## 14. Planos e upsell/downsell no checkout
+
+O checkout (`/checkout`) agora deixa escolher entre 3 combinações antes de pagar, cada uma vira uma
+única assinatura no Mercado Pago (não cobranças separadas):
+
+- **Essencial — R$47/mês**: só o atendimento por IA (como já era).
+- **Essencial + Atualização e Relatório — R$74/mês**: cliente edita as próprias informações no
+  painel dele e vê relatório semanal de conversas.
+- **Só o Relatório Semanal — R$54/mês**: só o relatório, sem edição.
+
+O plano escolhido fica em `leads.plano_contratado`, e é o que controla o que aparece no painel do
+cliente (seção 15). Os preços estão fixados no servidor (`app/api/checkout/route.ts`), não confiam
+em nada vindo do navegador.
+
+## 15. Painel do cliente (`/painel`)
+
+Cada cliente cria login e senha no formulário de implantação (seção 9.5/10.3) e entra em
+`/painel` pra ver: status da conexão do WhatsApp, resumo das configurações atuais, e (se o plano
+incluir) o relatório semanal e um link pra editar as próprias informações — mudanças ali já
+atualizam o prompt do bot na hora, sem precisar de você.
+
+Igual ao painel admin, o login do cliente usa Supabase Auth, mas com um layout de proteção
+separado (`app/painel/(protected)/layout.tsx`) que só libera acesso a quem tem uma linha em
+`clientes` vinculada (`user_id`) — um cliente nunca acessa dados de outro cliente, e (graças ao
+`ADMIN_EMAILS` da seção 13) não acessa `/admin`.
 
 ## Próxima etapa (fora do escopo desta entrega)
 
@@ -240,3 +271,5 @@ dias de expirar.
 - App Review da Meta, para conectar clientes reais além da lista de testers.
 - Gerenciar `produtos`/`faq` como itens estruturados no admin (hoje é texto livre dentro do
   gerador de prompt).
+- Upgrade/downgrade de plano depois de já assinado (hoje é só na hora do checkout).
+- Recuperação de senha customizada para o painel do cliente (usa o fluxo padrão do Supabase Auth).

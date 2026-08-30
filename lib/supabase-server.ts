@@ -36,3 +36,18 @@ export async function getSupabaseAuthClient() {
     },
   });
 }
+
+/**
+ * Checa se um e-mail pertence à lista de administradoras (ADMIN_EMAILS,
+ * separados por vírgula). Como clientes agora também têm login no mesmo
+ * projeto Supabase Auth (/painel), o painel admin não pode liberar acesso
+ * só por existir uma sessão. Precisa ser especificamente uma admin.
+ */
+export function ehEmailAdmin(email: string | null | undefined): boolean {
+  if (!email) return false;
+  const permitidos = (process.env.ADMIN_EMAILS ?? "")
+    .split(",")
+    .map((e) => e.trim().toLowerCase())
+    .filter(Boolean);
+  return permitidos.includes(email.toLowerCase());
+}
