@@ -23,6 +23,10 @@ export async function criarPreferenciaCheckout(params: {
   const client = getClient();
   const preference = new Preference(client);
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+  // O Mercado Pago exige que back_urls.success seja uma URL pública para usar
+  // auto_return; em localhost ele rejeita a preferência, então desativamos
+  // auto_return nesse caso (o resto do fluxo funciona normalmente).
+  const isPublicUrl = !siteUrl.includes("localhost");
 
   const result = await preference.create({
     body: {
@@ -41,7 +45,7 @@ export async function criarPreferenciaCheckout(params: {
         pending: `${siteUrl}/obrigado?lead=${params.leadId}&status=pending`,
         failure: `${siteUrl}/checkout?lead=${params.leadId}&status=failure`,
       },
-      auto_return: "approved",
+      ...(isPublicUrl ? { auto_return: "approved" as const } : {}),
       notification_url: `${siteUrl}/api/webhooks/mercadopago`,
     },
   });
