@@ -23,7 +23,6 @@ export function Hero() {
         <div className="mt-10">
           <ButtonLink href="/lead">Quero parar de perder vendas →</ButtonLink>
         </div>
-        <p className="mt-5 text-sm text-white/50">7 dias de garantia • 47/mês • Cancele quando quiser</p>
       </div>
     </section>
   );

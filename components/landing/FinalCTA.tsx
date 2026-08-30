@@ -20,7 +20,6 @@ export function FinalCTA() {
       <div className="mt-8">
         <ButtonLink href="/lead">Quero parar de perder vendas →</ButtonLink>
       </div>
-      <p className="mt-5 text-sm text-white/50">47/mês • 7 dias de garantia • Cancele quando quiser</p>
     </Section>
   );
 }
