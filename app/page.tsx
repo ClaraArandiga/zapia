@@ -5,6 +5,7 @@ import { Proof } from "@/components/landing/Proof";
 import { Offer } from "@/components/landing/Offer";
 import { Objections } from "@/components/landing/Objections";
 import { FinalCTA } from "@/components/landing/FinalCTA";
+import { Footer } from "@/components/ui/Footer";
 
 export default function HomePage() {
   return (
@@ -16,9 +17,7 @@ export default function HomePage() {
       <Offer />
       <Objections />
       <FinalCTA />
-      <footer className="border-t border-white/5 px-6 py-10 text-center text-xs text-white/40">
-        © {new Date().getFullYear()} ZapIA
-      </footer>
+      <Footer />
     </main>
   );
 }

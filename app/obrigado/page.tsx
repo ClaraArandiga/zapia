@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { ButtonLink } from "@/components/ui/Button";
+import { Footer } from "@/components/ui/Footer";
 
 function ObrigadoContent() {
   const params = useSearchParams();
@@ -44,8 +45,11 @@ function ObrigadoContent() {
 
 export default function ObrigadoPage() {
   return (
-    <Suspense fallback={null}>
-      <ObrigadoContent />
-    </Suspense>
+    <>
+      <Suspense fallback={null}>
+        <ObrigadoContent />
+      </Suspense>
+      <Footer />
+    </>
   );
 }

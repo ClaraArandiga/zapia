@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
+import { Footer } from "@/components/ui/Footer";
 
 const campoClass =
   "w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-white placeholder:text-white/30 focus:border-brand-400 focus:outline-none";
@@ -43,8 +44,9 @@ export default function LeadPage() {
   }
 
   return (
-    <main className="mx-auto min-h-screen max-w-2xl px-6 py-16">
-      <p className="text-sm font-semibold uppercase tracking-widest text-brand-400">Passo 1 de 3</p>
+    <>
+      <main className="mx-auto max-w-2xl px-6 py-16">
+        <p className="text-sm font-semibold uppercase tracking-widest text-brand-400">Passo 1 de 3</p>
       <h1 className="mt-2 text-3xl font-bold text-white">Conte sobre sua empresa</h1>
       <p className="mt-3 text-white/60">
         Essas informações vão ser usadas para entender seu projeto antes do pagamento. Depois de
@@ -103,6 +105,8 @@ export default function LeadPage() {
           {loading ? "Enviando..." : "Continuar para pagamento →"}
         </Button>
       </form>
-    </main>
+      </main>
+      <Footer />
+    </>
   );
 }

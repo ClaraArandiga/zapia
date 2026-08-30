@@ -148,16 +148,56 @@ perguntas frequentes.
 4. Peça para "falar com uma pessoa" numa mensagem, e confirme que `conversas.status` muda para
    `transferida_humano` (o bot para de responder automaticamente a partir daí).
 
-### 9.6. Indo para clientes reais
+## 10. Conectar clientes reais (Embedded Signup)
 
-Conectar o WhatsApp de clientes de verdade ao mesmo App (sem cada um precisar criar o próprio App
-Meta) exige que sua conta vire uma **Tech Provider** aprovada pela Meta, usando o fluxo de
-**Embedded Signup**. Isso é um processo de aprovação da Meta (não é código). Vale pesquisar
-"WhatsApp Embedded Signup" na documentação oficial quando chegar nessa fase.
+Isso substitui o passo 9.4 (criar cliente via SQL): o próprio cliente conecta o WhatsApp dele
+clicando num botão em `/onboarding`, sem precisar criar conta de desenvolvedor nem compartilhar
+senha. Funciona em modo de desenvolvimento com **testers** do seu App (sem esperar aprovação da
+Meta); para abrir para qualquer cliente, a Meta exige depois uma revisão do App (**App Review**).
+
+### 10.1. Configurar no Meta
+
+1. No mesmo App do passo 9.1, adicione o produto **Facebook Login for Business**.
+2. Vá em **WhatsApp Manager → Embedded Signup** (dentro do Business Manager) e crie uma
+   configuração. Isso gera um **Configuration ID**.
+3. Pegue o **App ID** em **Configurações do App → Básico**.
+4. Para testar antes do App Review: em **Funções do App → Testadores**, adicione seu próprio
+   usuário (ou de quem for testar) como tester.
+
+### 10.2. Variáveis de ambiente
+
+```
+NEXT_PUBLIC_WHATSAPP_APP_ID=<App ID>
+NEXT_PUBLIC_WHATSAPP_CONFIG_ID=<Configuration ID do Embedded Signup>
+```
+
+`WHATSAPP_APP_SECRET` (já configurado no passo 9.2) é reaproveitado para trocar o código de
+autorização por um token de acesso.
+
+### 10.3. Testar
+
+1. Acesse `/onboarding?lead=<id de um lead pago>` logada como tester no navegador.
+2. Clique em **Conectar WhatsApp Business**, escolha/crie o WABA do teste no popup da Meta.
+3. Confirme que apareceu "WhatsApp conectado" e que uma linha nova (ou atualizada) apareceu em
+   `clientes`, com `whatsapp_phone_number_id` e `whatsapp_access_token` preenchidos.
+4. Preencha o resto do formulário e envie — isso monta o prompt do bot automaticamente
+   (`empresa_config.prompt_sistema`) a partir das respostas.
+5. Mande uma mensagem de teste pro número conectado, igual no passo 9.5, e confirme que a IA
+   responde usando as informações reais que você preencheu no formulário.
+
+### 10.4. Abrindo para o público
+
+Enquanto o App não passa pelo **App Review** da Meta, só testers conseguem completar o Embedded
+Signup. Quando estiver pronta para clientes reais fora dessa lista, submeta o App para revisão
+pedindo as permissões `whatsapp_business_management` e `whatsapp_business_messaging` (a Meta pode
+pedir um vídeo curto mostrando o fluxo).
 
 ## Próxima etapa (fora do escopo desta entrega)
 
 - Suporte a mensagens de mídia (áudio, imagem) no webhook, hoje só texto.
-- Conversão automática de um `lead` implantado em `cliente` (hoje é manual via SQL).
-- Expandir o painel admin para gerenciar `clientes`, `produtos` e `faq` diretamente pela interface.
+- Renovação automática do token de acesso do WhatsApp (o token trocado no Embedded Signup tem
+  validade limitada).
+- Expandir o painel admin para gerenciar `clientes`, `produtos` e `faq` diretamente pela interface
+  (hoje o prompt vem do texto livre do formulário de implantação).
 - Notificação de verdade (WhatsApp/e-mail) para a equipe humana quando uma conversa é transferida.
+- App Review da Meta, para conectar clientes reais além da lista de testers.

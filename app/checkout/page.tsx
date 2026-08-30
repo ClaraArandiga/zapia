@@ -3,6 +3,7 @@
 import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/Button";
+import { Footer } from "@/components/ui/Footer";
 
 const incluso = [
   "IA personalizada com as informações da sua empresa",
@@ -87,8 +88,11 @@ function CheckoutContent() {
 
 export default function CheckoutPage() {
   return (
-    <Suspense fallback={null}>
-      <CheckoutContent />
-    </Suspense>
+    <>
+      <Suspense fallback={null}>
+        <CheckoutContent />
+      </Suspense>
+      <Footer />
+    </>
   );
 }

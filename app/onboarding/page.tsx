@@ -3,6 +3,8 @@
 import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/Button";
+import { ConectarWhatsapp } from "@/components/onboarding/ConectarWhatsapp";
+import { Footer } from "@/components/ui/Footer";
 
 const campoClass =
   "w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-white placeholder:text-white/30 focus:border-brand-400 focus:outline-none";
@@ -14,12 +16,16 @@ function OnboardingContent() {
   const leadId = params.get("lead");
   const [loading, setLoading] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
-  const [autorizouMeta, setAutorizouMeta] = useState(false);
+  const [whatsappConectado, setWhatsappConectado] = useState(false);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!leadId) {
       setErro("Link inválido. Volte para a página de obrigado e clique em continuar.");
+      return;
+    }
+    if (!whatsappConectado) {
+      setErro("Conecte seu WhatsApp Business antes de continuar.");
       return;
     }
     setLoading(true);
@@ -28,7 +34,7 @@ function OnboardingContent() {
     const form = new FormData(e.currentTarget);
     const payload = {
       lead_id: leadId,
-      autorizou_meta: autorizouMeta,
+      autorizou_meta: whatsappConectado,
       ...Object.fromEntries(form.entries()),
     };
 
@@ -68,19 +74,9 @@ function OnboardingContent() {
           <input name="whatsapp_business_number" required placeholder="(11) 99999-9999" className={campoClass} />
         </div>
 
-        <div className="flex items-start gap-3 rounded-xl border border-brand-500/30 bg-brand-500/5 p-4">
-          <input
-            type="checkbox"
-            id="autorizou_meta"
-            checked={autorizouMeta}
-            onChange={(e) => setAutorizouMeta(e.target.checked)}
-            className="mt-1 h-4 w-4"
-          />
-          <label htmlFor="autorizou_meta" className="text-sm text-white/70">
-            Estou de acordo em receber as instruções para autorizar oficialmente nossa conexão ao
-            meu WhatsApp Business através da Meta (não é necessário compartilhar senha alguma).
-          </label>
-        </div>
+        {leadId && (
+          <ConectarWhatsapp leadId={leadId} onConectado={() => setWhatsappConectado(true)} />
+        )}
 
         <div>
           <label className={labelClass}>Produtos/serviços e preços</label>
@@ -121,7 +117,11 @@ function OnboardingContent() {
 
         {erro && <p className="text-sm text-red-400">{erro}</p>}
 
-        <Button type="submit" disabled={loading} className="mt-2 disabled:opacity-60">
+        <Button
+          type="submit"
+          disabled={loading || !whatsappConectado}
+          className="mt-2 disabled:opacity-60"
+        >
           {loading ? "Enviando..." : "Concluir configuração"}
         </Button>
       </form>
@@ -131,8 +131,11 @@ function OnboardingContent() {
 
 export default function OnboardingPage() {
   return (
-    <Suspense fallback={null}>
-      <OnboardingContent />
-    </Suspense>
+    <>
+      <Suspense fallback={null}>
+        <OnboardingContent />
+      </Suspense>
+      <Footer />
+    </>
   );
 }
