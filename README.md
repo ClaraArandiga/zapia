@@ -2,10 +2,9 @@
 
 Funil completo: landing page → formulário inicial (lead) → checkout de assinatura R$47/mês
 (Mercado Pago) → confirmação de pagamento → formulário de implantação (dados técnicos/sensíveis).
-Inclui também o painel admin (`/admin`) para acompanhar os leads sem precisar abrir o Supabase.
-
-O motor do bot em si (webhook do WhatsApp respondendo com IA) é a próxima etapa. O schema do banco
-já está pronto para isso em `supabase/schema.sql`.
+Inclui o painel admin (`/admin`) para acompanhar os leads, e o motor do chatbot em si: um webhook
+do WhatsApp (`app/api/webhooks/whatsapp`) que responde os clientes finais usando IA (Gemini),
+multi-cliente (cada empresa conectada fica identificada pelo próprio número de WhatsApp).
 
 ## 1. Instalar dependências
 
@@ -88,11 +87,77 @@ Quando estiver pronta para cobrar de verdade:
 5. Faça uma assinatura de teste real (você mesma, com um cartão de verdade) e cancele logo em
    seguida para confirmar que todo o fluxo funciona antes de anunciar publicamente.
 
+## 9. Configurar e testar o chatbot do WhatsApp
+
+O bot é multi-cliente: um único Meta App (o seu, como "provedor de tecnologia") recebe as
+mensagens de todos os números conectados, identificando de qual empresa é cada mensagem pelo
+`phone_number_id` (salvo por cliente na tabela `clientes`). Para desenvolver, use o **número de
+teste gratuito** que a Meta dá em todo App novo.
+
+### 9.1. Criar o Meta App e pegar o número de teste
+
+1. Acesse **https://developers.facebook.com/apps** → **Criar app** → tipo "Negócios" (Business).
+2. Dentro do App, adicione o produto **WhatsApp**.
+3. Na página do produto WhatsApp → **Introdução/API Setup**, você já tem um número de teste
+   pronto, com **Phone Number ID** e um **Access Token temporário** (válido por 24h, dá pra gerar
+   de novo quantas vezes precisar durante os testes).
+4. Nessa mesma tela, cadastre até 5 números de WhatsApp seus/de confiança em **To** para poder
+   mandar mensagens de teste para o número da Meta.
+
+### 9.2. Configurar o webhook
+
+1. Escolha um valor qualquer para `WHATSAPP_VERIFY_TOKEN` (uma senha simples, você inventa).
+2. No App, vá em **WhatsApp → Configuration → Webhook** → **Edit**.
+3. **Callback URL**: `https://SEU-DOMINIO/api/webhooks/whatsapp`
+4. **Verify token**: o mesmo valor que você colocou em `WHATSAPP_VERIFY_TOKEN`.
+5. Clique em **Verify and save** (o código já responde esse handshake automaticamente).
+6. Em **Webhook fields**, clique em **Manage** e assine o campo **messages**.
+7. Opcional (recomendado em produção): copie o **App Secret** do App (Configurações → Básico) para
+   `WHATSAPP_APP_SECRET`, para validar que as notificações vêm mesmo da Meta.
+
+### 9.3. Configurar o Gemini
+
+1. Acesse **https://aistudio.google.com/apikey** (login com conta Google, sem cartão).
+2. Crie uma chave e copie para `GEMINI_API_KEY`.
+
+### 9.4. Criar um cliente de teste
+
+O painel admin ainda não cadastra `clientes` (só `leads`). Por enquanto, crie um direto no
+**SQL Editor** do Supabase, usando o Phone Number ID e o Access Token do passo 9.1:
+
+```sql
+with novo_cliente as (
+  insert into clientes (nome_empresa, segmento, whatsapp_phone_number_id, whatsapp_access_token)
+  values ('Minha Empresa Teste', 'loja de roupas', 'SEU_PHONE_NUMBER_ID', 'SEU_ACCESS_TOKEN')
+  returning id
+)
+insert into produtos (cliente_id, nome, descricao, preco)
+select id, 'Camiseta básica', 'Algodão, várias cores', 59.90 from novo_cliente;
+```
+
+Repita um `insert into faq (cliente_id, pergunta, resposta) values (...)` se quiser testar
+perguntas frequentes.
+
+### 9.5. Testar
+
+1. `npm run dev` local + túnel (`ngrok http 3000`), com o Callback URL do passo 9.2 apontando para
+   a URL do túnel (você pode reconfigurar depois para o domínio da Vercel).
+2. Mande uma mensagem de um dos números verificados de teste para o número de teste do WhatsApp.
+3. A IA deve responder usando as informações do cliente cadastrado. Confira as tabelas `conversas`
+   e `mensagens` no Supabase para ver o histórico salvo.
+4. Peça para "falar com uma pessoa" numa mensagem, e confirme que `conversas.status` muda para
+   `transferida_humano` (o bot para de responder automaticamente a partir daí).
+
+### 9.6. Indo para clientes reais
+
+Conectar o WhatsApp de clientes de verdade ao mesmo App (sem cada um precisar criar o próprio App
+Meta) exige que sua conta vire uma **Tech Provider** aprovada pela Meta, usando o fluxo de
+**Embedded Signup**. Isso é um processo de aprovação da Meta (não é código). Vale pesquisar
+"WhatsApp Embedded Signup" na documentação oficial quando chegar nessa fase.
+
 ## Próxima etapa (fora do escopo desta entrega)
 
-- `app/api/webhook/whatsapp`: receber mensagens do WhatsApp Cloud API (Meta for Developers) de
-  cada cliente e responder usando a camada de IA já esboçada em `lib/ai/`
-  (`AI_PROVIDER=anthropic` ou `openai`). Depende da conta Meta for Developers de cada cliente
-  final, não é algo configurado uma única vez.
-- Expandir o painel admin para gerenciar `clientes`, `produtos` e `faq` (tabelas do bot) quando o
-  webhook acima existir.
+- Suporte a mensagens de mídia (áudio, imagem) no webhook, hoje só texto.
+- Conversão automática de um `lead` implantado em `cliente` (hoje é manual via SQL).
+- Expandir o painel admin para gerenciar `clientes`, `produtos` e `faq` diretamente pela interface.
+- Notificação de verdade (WhatsApp/e-mail) para a equipe humana quando uma conversa é transferida.

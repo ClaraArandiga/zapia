@@ -1,12 +1,13 @@
 /**
- * Camada de IA plugável para o motor do bot (próxima etapa, ainda não é
- * chamada por nenhuma rota do funil de vendas).
+ * Camada de IA plugável, usada pelo webhook do WhatsApp
+ * (app/api/webhooks/whatsapp/route.ts) para responder aos clientes finais.
  *
- * Troque o provedor via AI_PROVIDER=anthropic|openai em .env.local.
- * Quando o webhook do WhatsApp for implementado, ele deve chamar
- * `getAIProvider().responder(...)` em vez de falar diretamente com
- * Anthropic ou OpenAI.
+ * Troque o provedor via AI_PROVIDER=gemini|anthropic|openai em .env.local
+ * (só o Gemini está implementado de verdade por enquanto).
  */
+
+/** Tag que o modelo inclui na resposta quando não consegue ajudar sozinho. */
+export const TAG_TRANSFERIR_HUMANO = "[[TRANSFERIR_HUMANO]]";
 
 export interface MensagemConversa {
   autor: "cliente" | "bot";
@@ -23,15 +24,20 @@ export interface AIProvider {
 }
 
 export function getAIProvider(): AIProvider {
-  const provider = process.env.AI_PROVIDER ?? "anthropic";
+  const provider = process.env.AI_PROVIDER ?? "gemini";
 
   if (provider === "openai") {
     const { openaiProvider } = require("./openai") as typeof import("./openai");
     return openaiProvider;
   }
 
-  const { anthropicProvider } = require("./anthropic") as typeof import("./anthropic");
-  return anthropicProvider;
+  if (provider === "anthropic") {
+    const { anthropicProvider } = require("./anthropic") as typeof import("./anthropic");
+    return anthropicProvider;
+  }
+
+  const { geminiProvider } = require("./gemini") as typeof import("./gemini");
+  return geminiProvider;
 }
 
 export function montarPromptSistema(config: {
@@ -61,5 +67,7 @@ ${config.faq ?? "não informado"}
 Formas de pagamento: ${config.formasPagamento ?? "não informado"}
 Política de troca/cancelamento: ${config.politicaTrocaCancelamento ?? "não informado"}
 
-Transfira para um humano quando: ${config.quandoTransferirHumano ?? "o cliente pedir explicitamente"}`;
+Transfira para um humano quando: ${config.quandoTransferirHumano ?? "o cliente pedir explicitamente"}
+
+Se não conseguir ajudar ou o cliente pedir para falar com uma pessoa, inclua a tag ${TAG_TRANSFERIR_HUMANO} em algum lugar da sua resposta (o sistema remove essa tag antes de enviar a mensagem).`;
 }
