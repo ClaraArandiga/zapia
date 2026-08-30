@@ -1,3 +1,4 @@
+import { ButtonLink } from "@/components/ui/Button";
 import { Section } from "@/components/ui/Section";
 
 export function CustoOportunidade() {
@@ -11,8 +12,10 @@ export function CustoOportunidade() {
           Imagine que apenas <strong className="text-white">uma pessoa por mês</strong> deixe de
           comprar porque demorou demais para receber uma resposta.
         </p>
-        <p className="mt-4 text-white/70">Agora compare isso com:</p>
-        <p className="mt-6 text-5xl font-bold text-white">
+      </div>
+      <div className="mx-auto mt-10 max-w-md rounded-3xl border border-brand-500/30 bg-gradient-to-b from-brand-500/10 to-transparent p-8 text-center">
+        <p className="text-white/70">Agora compare isso com:</p>
+        <p className="mt-4 text-5xl font-bold text-white">
           47<span className="text-lg font-normal text-white/50">/mês</span>
         </p>
         <p className="mt-6 text-white/60">
@@ -22,12 +25,9 @@ export function CustoOportunidade() {
         <p className="mt-6 font-semibold text-white">
           Se ele recuperar uma única venda que seria perdida, pode praticamente se pagar.
         </p>
-        <p className="mt-8 text-white/60">A pergunta não é:</p>
-        <p className="mt-1 font-semibold text-white">&ldquo;Quanto custa o ZapIA?&rdquo;</p>
-        <p className="mt-4 text-white/60">A pergunta é:</p>
-        <p className="mt-1 font-semibold text-white">
-          &ldquo;Quanto está custando para continuar deixando seus clientes esperando?&rdquo;
-        </p>
+        <ButtonLink href="/lead" className="mt-8 w-full">
+          Quero meu atendente de IA →
+        </ButtonLink>
       </div>
     </Section>
   );
