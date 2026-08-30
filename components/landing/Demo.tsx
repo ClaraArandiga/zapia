@@ -20,7 +20,7 @@ export function Demo() {
     <Section id="demonstracao">
       <Eyebrow>Demonstração</Eyebrow>
       <h2 className="max-w-2xl text-3xl font-bold text-white sm:text-4xl">
-        Veja o bot conversando com um cliente real
+        Veja o que seu cliente enxergaria.
       </h2>
       <p className="mt-4 max-w-xl text-white/60">
         A IA responde no tom da sua empresa, usando só as informações que você fornece: preços,
@@ -50,6 +50,9 @@ export function Demo() {
           ))}
         </div>
       </div>
+      <p className="mt-6 max-w-md font-semibold text-white">
+        É isso que acontece enquanto você faz outras coisas.
+      </p>
     </Section>
   );
 }
