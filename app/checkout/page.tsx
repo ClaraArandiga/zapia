@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { Footer } from "@/components/ui/Footer";
+import { ConfiancaBadges } from "@/components/ui/ConfiancaBadges";
 
 type Plano = "base" | "upsell" | "downsell";
 type Etapa = "oferta" | "downsell";
@@ -180,13 +181,8 @@ function CheckoutContent() {
         </>
       )}
 
-      <div className="mt-6 flex flex-col items-center gap-1.5 text-sm text-white/60">
-        <p className="flex items-center gap-2">
-          <span aria-hidden="true">🔒</span> Pagamento processado com segurança pelo Mercado Pago.
-        </p>
-        <p className="flex items-center gap-2">
-          <span aria-hidden="true">🛡️</span> Garantia de 7 dias.
-        </p>
+      <div className="mt-14 w-full">
+        <ConfiancaBadges />
       </div>
     </main>
   );
