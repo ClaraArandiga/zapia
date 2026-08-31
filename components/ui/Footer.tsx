@@ -12,6 +12,10 @@ export function Footer() {
       <p className="mt-3">
         <Link href="/termos" className="hover:text-white/70 hover:underline">
           Termos de Uso
+        </Link>{" "}
+        •{" "}
+        <Link href="/politica-de-privacidade" className="hover:text-white/70 hover:underline">
+          Política de Privacidade
         </Link>
       </p>
       <p className="mt-2">© {new Date().getFullYear()} ZapIA</p>

@@ -34,11 +34,13 @@ create table if not exists leads (
   mp_preference_id text,
   mp_payment_id text,
 
-  termos_aceitos_em timestamptz      -- data/hora em que aceitou os Termos de Uso, antes de pagar
+  termos_aceitos_em timestamptz,     -- data/hora em que aceitou os Termos de Uso, antes de pagar
+  politica_privacidade_aceita_em timestamptz  -- data/hora em que aceitou a Política de Privacidade, antes de pagar
 );
 
 -- para bancos que já tinham a tabela `leads` antes destas colunas existirem
 alter table leads add column if not exists termos_aceitos_em timestamptz;
+alter table leads add column if not exists politica_privacidade_aceita_em timestamptz;
 alter table leads add column if not exists plano_contratado text not null default 'base';
 alter table leads drop constraint if exists leads_plano_contratado_check;
 alter table leads add constraint leads_plano_contratado_check

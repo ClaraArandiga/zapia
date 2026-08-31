@@ -8,6 +8,9 @@ const checkoutSchema = z.object({
   termosAceitos: z.literal(true, {
     errorMap: () => ({ message: "É preciso aceitar os Termos de Uso" }),
   }),
+  politicaAceita: z.literal(true, {
+    errorMap: () => ({ message: "É preciso aceitar a Política de Privacidade" }),
+  }),
   plano: z.enum(["base", "upsell", "downsell"]).default("base"),
 });
 
@@ -25,7 +28,10 @@ export async function POST(request: Request) {
   const parsed = checkoutSchema.safeParse(body);
 
   if (!parsed.success) {
-    return NextResponse.json({ error: "Dados inválidos ou termos não aceitos" }, { status: 400 });
+    return NextResponse.json(
+      { error: "Dados inválidos ou termos/política não aceitos" },
+      { status: 400 }
+    );
   }
 
   const supabase = getSupabaseServiceClient();
@@ -50,6 +56,7 @@ export async function POST(request: Request) {
     .from("leads")
     .update({
       termos_aceitos_em: new Date().toISOString(),
+      politica_privacidade_aceita_em: new Date().toISOString(),
       plano_contratado: parsed.data.plano,
     })
     .eq("id", lead.id);

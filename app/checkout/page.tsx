@@ -17,6 +17,7 @@ function CheckoutContent() {
   const [loading, setLoading] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
   const [termosAceitos, setTermosAceitos] = useState(false);
+  const [politicaAceita, setPoliticaAceita] = useState(false);
   const [etapa, setEtapa] = useState<Etapa>("oferta");
 
   async function iniciarPagamento(plano: Plano) {
@@ -24,8 +25,8 @@ function CheckoutContent() {
       setErro("Não encontramos seu cadastro. Volte e preencha o formulário novamente.");
       return;
     }
-    if (!termosAceitos) {
-      setErro("É preciso aceitar os Termos de Uso para continuar.");
+    if (!termosAceitos || !politicaAceita) {
+      setErro("É preciso aceitar os Termos de Uso e a Política de Privacidade para continuar.");
       return;
     }
     setLoading(true);
@@ -35,7 +36,7 @@ function CheckoutContent() {
       const res = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ leadId, termosAceitos, plano }),
+        body: JSON.stringify({ leadId, termosAceitos, politicaAceita, plano }),
       });
       const data = await res.json();
 
@@ -53,8 +54,8 @@ function CheckoutContent() {
   }
 
   function quererSoAIA() {
-    if (!termosAceitos) {
-      setErro("É preciso aceitar os Termos de Uso para continuar.");
+    if (!termosAceitos || !politicaAceita) {
+      setErro("É preciso aceitar os Termos de Uso e a Política de Privacidade para continuar.");
       return;
     }
     setErro(null);
@@ -62,19 +63,39 @@ function CheckoutContent() {
   }
 
   const termosCheckbox = (
-    <label className="mt-8 flex items-start gap-3 text-left text-sm text-white/70">
-      <input
-        type="checkbox"
-        checked={termosAceitos}
-        onChange={(e) => setTermosAceitos(e.target.checked)}
-        className="mt-1 h-4 w-4"
-      />
-      Li e aceito os{" "}
-      <Link href="/termos" target="_blank" className="text-brand-400 hover:underline">
-        Termos de Uso
-      </Link>
-      .
-    </label>
+    <>
+      <label className="mt-8 flex items-start gap-3 text-left text-sm text-white/70">
+        <input
+          type="checkbox"
+          checked={termosAceitos}
+          onChange={(e) => setTermosAceitos(e.target.checked)}
+          className="mt-1 h-4 w-4"
+        />
+        Li e aceito os{" "}
+        <Link href="/termos" target="_blank" className="text-brand-400 hover:underline">
+          Termos de Uso
+        </Link>
+        .
+      </label>
+      <label className="mt-3 flex items-start gap-3 text-left text-sm text-white/70">
+        <input
+          type="checkbox"
+          checked={politicaAceita}
+          onChange={(e) => setPoliticaAceita(e.target.checked)}
+          className="mt-1 h-4 w-4"
+        />
+        Li e aceito a{" "}
+        <Link
+          href="/politica-de-privacidade"
+          target="_blank"
+          className="text-brand-400 hover:underline"
+        >
+          Política de Privacidade
+        </Link>
+        , e concordo com a coleta e o uso dos meus dados e das conversas do meu WhatsApp para o
+        funcionamento do serviço.
+      </label>
+    </>
   );
 
   return (
