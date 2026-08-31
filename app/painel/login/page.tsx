@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { signIn } from "@/app/painel/actions";
 
 const campoClass =
@@ -40,6 +41,13 @@ export default async function PainelLoginPage({
           Entrar
         </button>
       </form>
+
+      <Link
+        href="/painel/recuperar-senha"
+        className="mt-4 text-sm text-white/50 hover:text-white/80"
+      >
+        Esqueci minha senha
+      </Link>
     </main>
   );
 }
