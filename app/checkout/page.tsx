@@ -168,7 +168,7 @@ function CheckoutContent() {
             type="button"
             onClick={() => iniciarPagamento("base")}
             disabled={loading}
-            className="mt-4 text-sm text-white/50 underline hover:text-white/80 disabled:opacity-60"
+            className="mt-4 w-full rounded-full border border-white/20 py-3 text-sm font-semibold text-white transition hover:border-white/40 hover:bg-white/5 disabled:opacity-60"
           >
             {loading ? "Redirecionando..." : "Não, quero só a IA (47/mês) →"}
           </button>
