@@ -23,6 +23,12 @@ const TITULOS: Record<string, string> = {
   downsell: "ZapIA + Relatório Semanal",
 };
 
+// Chave de emergência: a conta do Mercado Pago ainda não está liberada pra
+// receber assinaturas (precisa virar Conta Negócio). Enquanto isso, pula o
+// pagamento e libera o cadastro direto. Reverte assim que MERCADOPAGO_ACCESS_TOKEN
+// estiver numa Conta Negócio: é só definir PAGAMENTO_HABILITADO=true na Vercel.
+const PAGAMENTO_HABILITADO = process.env.PAGAMENTO_HABILITADO === "true";
+
 export async function POST(request: Request) {
   const body = await request.json();
   const parsed = checkoutSchema.safeParse(body);
@@ -62,6 +68,22 @@ export async function POST(request: Request) {
     .eq("id", lead.id);
 
   const preco = PRECOS[parsed.data.plano];
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+
+  if (!PAGAMENTO_HABILITADO) {
+    await supabase.from("leads").update({ status: "pago" }).eq("id", lead.id);
+    await supabase.from("assinaturas").upsert(
+      {
+        lead_id: lead.id,
+        mp_preapproval_id: `sem-pagamento-${lead.id}`,
+        status: "authorized",
+        valor: preco,
+      },
+      { onConflict: "mp_preapproval_id" }
+    );
+
+    return NextResponse.json({ initPoint: `${siteUrl}/obrigado?lead=${lead.id}` });
+  }
 
   const { initPoint } = await criarAssinatura({
     leadId: lead.id,

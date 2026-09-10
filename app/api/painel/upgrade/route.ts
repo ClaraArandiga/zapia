@@ -10,6 +10,10 @@ const TITULOS: Record<string, string> = {
   downsell: "ZapIA + Relatório Semanal",
 };
 
+// Mesma chave de emergência do /api/checkout: pula o Mercado Pago enquanto a
+// conta não vira Conta Negócio. Reverte com PAGAMENTO_HABILITADO=true na Vercel.
+const PAGAMENTO_HABILITADO = process.env.PAGAMENTO_HABILITADO === "true";
+
 const upgradeSchema = z.object({
   plano: z.enum(["upsell", "downsell"]),
 });
@@ -51,6 +55,23 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "cadastro sem e-mail para a assinatura" }, { status: 400 });
   }
 
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+
+  if (!PAGAMENTO_HABILITADO) {
+    await service.from("leads").update({ plano_contratado: parsed.data.plano }).eq("id", cliente.lead_id);
+    await service.from("assinaturas").upsert(
+      {
+        lead_id: cliente.lead_id,
+        mp_preapproval_id: `sem-pagamento-${cliente.lead_id}`,
+        status: "authorized",
+        valor: PRECOS[parsed.data.plano],
+      },
+      { onConflict: "mp_preapproval_id" }
+    );
+
+    return NextResponse.json({ initPoint: `${siteUrl}/painel?sucesso=upgrade` });
+  }
+
   // cancela a assinatura atual, se houver uma pendente/autorizada, antes de criar a nova
   const { data: assinaturaAtual } = await service
     .from("assinaturas")
@@ -67,8 +88,6 @@ export async function POST(request: Request) {
       console.error("Erro ao cancelar assinatura anterior no upgrade:", err);
     }
   }
-
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 
   const { initPoint } = await criarAssinatura({
     leadId: cliente.lead_id,
