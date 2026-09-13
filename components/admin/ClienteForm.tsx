@@ -25,6 +25,8 @@ interface EmpresaConfig {
   politica_troca_cancelamento: string | null;
   quando_transferir_humano: string | null;
   contato_equipe_humana: string | null;
+  restricoes: string | null;
+  observacoes: string | null;
   prompt_sistema: string | null;
 }
 
@@ -39,11 +41,17 @@ export function ClienteForm({
   const [segmento, setSegmento] = useState(cliente?.segmento ?? "");
   const [tomDeVoz, setTomDeVoz] = useState(empresaConfig?.tom_de_voz ?? "");
   const [horarioAtendimento, setHorarioAtendimento] = useState(empresaConfig?.horario_atendimento ?? "");
+  const [enderecoLocalizacao, setEnderecoLocalizacao] = useState(empresaConfig?.endereco_localizacao ?? "");
   const [formasPagamento, setFormasPagamento] = useState(empresaConfig?.formas_pagamento ?? "");
   const [politicaTroca, setPoliticaTroca] = useState(empresaConfig?.politica_troca_cancelamento ?? "");
+  const [comoFuncionaAtendimento, setComoFuncionaAtendimento] = useState("");
   const [quandoTransferir, setQuandoTransferir] = useState(empresaConfig?.quando_transferir_humano ?? "");
+  const [contatoEquipeHumana, setContatoEquipeHumana] = useState(empresaConfig?.contato_equipe_humana ?? "");
   const [produtosServicos, setProdutosServicos] = useState("");
+  const [diferenciais, setDiferenciais] = useState("");
   const [faq, setFaq] = useState("");
+  const [restricoes, setRestricoes] = useState(empresaConfig?.restricoes ?? "");
+  const [observacoes, setObservacoes] = useState(empresaConfig?.observacoes ?? "");
   const [promptSistema, setPromptSistema] = useState(empresaConfig?.prompt_sistema ?? "");
   const [gerando, setGerando] = useState(false);
 
@@ -58,11 +66,17 @@ export function ClienteForm({
           segmento,
           tomDeVoz,
           horarioAtendimento,
+          enderecoLocalizacao,
           produtosServicos,
+          diferenciais,
           faq,
           formasPagamento,
           politicaTrocaCancelamento: politicaTroca,
+          comoFuncionaAtendimento,
           quandoTransferirHumano: quandoTransferir,
+          contatoEquipeHumana,
+          restricoes,
+          observacoes,
         }),
       });
       const data = await res.json();
@@ -152,7 +166,8 @@ export function ClienteForm({
         <label className={labelClass}>Endereço/localização</label>
         <input
           name="endereco_localizacao"
-          defaultValue={empresaConfig?.endereco_localizacao ?? ""}
+          value={enderecoLocalizacao}
+          onChange={(e) => setEnderecoLocalizacao(e.target.value)}
           className={campoClass}
         />
       </div>
@@ -189,7 +204,28 @@ export function ClienteForm({
         <label className={labelClass}>Contato da equipe humana</label>
         <input
           name="contato_equipe_humana"
-          defaultValue={empresaConfig?.contato_equipe_humana ?? ""}
+          value={contatoEquipeHumana}
+          onChange={(e) => setContatoEquipeHumana(e.target.value)}
+          className={campoClass}
+        />
+      </div>
+      <div>
+        <label className={labelClass}>O que a IA nunca deve fazer ou prometer</label>
+        <textarea
+          name="restricoes"
+          rows={2}
+          value={restricoes}
+          onChange={(e) => setRestricoes(e.target.value)}
+          className={campoClass}
+        />
+      </div>
+      <div>
+        <label className={labelClass}>Observações</label>
+        <textarea
+          name="observacoes"
+          rows={2}
+          value={observacoes}
+          onChange={(e) => setObservacoes(e.target.value)}
           className={campoClass}
         />
       </div>
@@ -212,8 +248,26 @@ export function ClienteForm({
           />
         </div>
         <div className="mt-3">
+          <label className={labelClass}>Diferenciais da empresa</label>
+          <textarea
+            rows={2}
+            value={diferenciais}
+            onChange={(e) => setDiferenciais(e.target.value)}
+            className={campoClass}
+          />
+        </div>
+        <div className="mt-3">
           <label className={labelClass}>Perguntas frequentes</label>
           <textarea rows={3} value={faq} onChange={(e) => setFaq(e.target.value)} className={campoClass} />
+        </div>
+        <div className="mt-3">
+          <label className={labelClass}>Como funciona o atendimento/venda/agendamento</label>
+          <textarea
+            rows={2}
+            value={comoFuncionaAtendimento}
+            onChange={(e) => setComoFuncionaAtendimento(e.target.value)}
+            className={campoClass}
+          />
         </div>
         <button
           type="button"

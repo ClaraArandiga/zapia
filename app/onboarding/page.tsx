@@ -97,6 +97,15 @@ function OnboardingContent() {
           <textarea name="produtos_servicos" rows={3} className={campoClass} />
         </div>
         <div>
+          <label className={labelClass}>Diferenciais da empresa</label>
+          <textarea
+            name="diferenciais"
+            rows={2}
+            placeholder="O que faz o cliente escolher vocês em vez do concorrente?"
+            className={campoClass}
+          />
+        </div>
+        <div>
           <label className={labelClass}>Perguntas frequentes e respostas</label>
           <textarea name="faq" rows={4} className={campoClass} />
         </div>
@@ -123,6 +132,15 @@ function OnboardingContent() {
         <div>
           <label className={labelClass}>Contato da equipe humana</label>
           <input name="contato_equipe_humana" className={campoClass} />
+        </div>
+        <div>
+          <label className={labelClass}>O que a IA nunca deve fazer ou prometer</label>
+          <textarea
+            name="restricoes"
+            rows={2}
+            placeholder="Ex: nunca dar desconto sem autorização, nunca falar de concorrentes..."
+            className={campoClass}
+          />
         </div>
         <div>
           <label className={labelClass}>Observações</label>

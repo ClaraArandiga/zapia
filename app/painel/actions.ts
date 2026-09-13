@@ -74,10 +74,14 @@ export async function salvarInformacoes(formData: FormData) {
     endereco_localizacao: campo("endereco_localizacao"),
     formas_pagamento: campo("formas_pagamento"),
     politica_troca_cancelamento: campo("politica_troca_cancelamento"),
+    como_funciona_atendimento: campo("como_funciona_atendimento"),
     quando_transferir_humano: campo("quando_transferir_humano"),
     contato_equipe_humana: campo("contato_equipe_humana"),
     produtos_servicos: campo("produtos_servicos"),
+    diferenciais: campo("diferenciais"),
     faq: campo("faq"),
+    restricoes: campo("restricoes"),
+    observacoes: campo("observacoes"),
   };
 
   const promptSistema = montarPromptSistema({
@@ -85,11 +89,17 @@ export async function salvarInformacoes(formData: FormData) {
     segmento: cliente.segmento ?? "",
     tomDeVoz: dados.tom_de_voz,
     horarioAtendimento: dados.horario_atendimento,
+    enderecoLocalizacao: dados.endereco_localizacao,
     produtosServicos: dados.produtos_servicos,
+    diferenciais: dados.diferenciais,
     faq: dados.faq,
     formasPagamento: dados.formas_pagamento,
     politicaTrocaCancelamento: dados.politica_troca_cancelamento,
+    comoFuncionaAtendimento: dados.como_funciona_atendimento,
     quandoTransferirHumano: dados.quando_transferir_humano,
+    contatoEquipeHumana: dados.contato_equipe_humana,
+    restricoes: dados.restricoes,
+    observacoes: dados.observacoes,
   });
 
   await service

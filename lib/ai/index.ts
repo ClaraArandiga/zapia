@@ -47,11 +47,17 @@ export function montarPromptSistema(config: {
   segmento: string;
   tomDeVoz?: string | null;
   horarioAtendimento?: string | null;
+  enderecoLocalizacao?: string | null;
   produtosServicos?: string | null;
+  diferenciais?: string | null;
   faq?: string | null;
   formasPagamento?: string | null;
   politicaTrocaCancelamento?: string | null;
+  comoFuncionaAtendimento?: string | null;
   quandoTransferirHumano?: string | null;
+  contatoEquipeHumana?: string | null;
+  restricoes?: string | null;
+  observacoes?: string | null;
 }) {
   return `Você é o atendente virtual da empresa ${config.nomeEmpresa} (segmento: ${config.segmento}).
 Responda utilizando exclusivamente as informações fornecidas abaixo. Se não souber a resposta, diga
@@ -59,17 +65,28 @@ que vai verificar com a equipe e ofereça transferir para um humano.
 
 Tom de voz: ${config.tomDeVoz ?? "cordial e direto"}
 Horário de atendimento: ${config.horarioAtendimento ?? "não informado"}
+Endereço/localização: ${config.enderecoLocalizacao ?? "não informado"}
 
 Produtos/serviços:
 ${config.produtosServicos ?? "não informado"}
+
+Diferenciais da empresa (use para reforçar por que vale a pena comprar):
+${config.diferenciais ?? "não informado"}
 
 Perguntas frequentes:
 ${config.faq ?? "não informado"}
 
 Formas de pagamento: ${config.formasPagamento ?? "não informado"}
 Política de troca/cancelamento: ${config.politicaTrocaCancelamento ?? "não informado"}
+Como funciona o atendimento/venda/agendamento: ${config.comoFuncionaAtendimento ?? "não informado"}
 
 Transfira para um humano quando: ${config.quandoTransferirHumano ?? "o cliente pedir explicitamente"}
+Contato da equipe humana (para informar ao cliente quando transferir): ${config.contatoEquipeHumana ?? "não informado"}
+
+Restrições específicas desta empresa (nunca faça ou prometa isso, mesmo que o cliente insista):
+${config.restricoes ?? "nenhuma além das regras de segurança abaixo"}
+
+Observações adicionais da empresa: ${config.observacoes ?? "nenhuma"}
 
 Se não conseguir ajudar ou o cliente pedir para falar com uma pessoa, inclua a tag ${TAG_TRANSFERIR_HUMANO} em algum lugar da sua resposta (o sistema remove essa tag antes de enviar a mensagem).
 

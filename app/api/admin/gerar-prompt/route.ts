@@ -19,11 +19,17 @@ export async function POST(request: Request) {
     segmento: body.segmento ?? "",
     tomDeVoz: body.tomDeVoz || null,
     horarioAtendimento: body.horarioAtendimento || null,
+    enderecoLocalizacao: body.enderecoLocalizacao || null,
     produtosServicos: body.produtosServicos || null,
+    diferenciais: body.diferenciais || null,
     faq: body.faq || null,
     formasPagamento: body.formasPagamento || null,
     politicaTrocaCancelamento: body.politicaTrocaCancelamento || null,
+    comoFuncionaAtendimento: body.comoFuncionaAtendimento || null,
     quandoTransferirHumano: body.quandoTransferirHumano || null,
+    contatoEquipeHumana: body.contatoEquipeHumana || null,
+    restricoes: body.restricoes || null,
+    observacoes: body.observacoes || null,
   });
 
   return NextResponse.json({ promptSistema });

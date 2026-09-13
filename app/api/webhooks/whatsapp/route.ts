@@ -150,13 +150,21 @@ export async function POST(request: Request) {
       segmento: cliente.segmento ?? "",
       tomDeVoz: empresaConfig?.tom_de_voz,
       horarioAtendimento: empresaConfig?.horario_atendimento,
+      enderecoLocalizacao: empresaConfig?.endereco_localizacao,
       produtosServicos: produtos?.length
         ? produtos.map((p) => `${p.nome} - R$ ${p.preco}${p.descricao ? `: ${p.descricao}` : ""}`).join("\n")
-        : null,
-      faq: faqs?.length ? faqs.map((f) => `P: ${f.pergunta}\nR: ${f.resposta}`).join("\n\n") : null,
+        : empresaConfig?.produtos_servicos,
+      diferenciais: empresaConfig?.diferenciais,
+      faq: faqs?.length
+        ? faqs.map((f) => `P: ${f.pergunta}\nR: ${f.resposta}`).join("\n\n")
+        : empresaConfig?.faq,
       formasPagamento: empresaConfig?.formas_pagamento,
       politicaTrocaCancelamento: empresaConfig?.politica_troca_cancelamento,
+      comoFuncionaAtendimento: empresaConfig?.como_funciona_atendimento,
       quandoTransferirHumano: empresaConfig?.quando_transferir_humano,
+      contatoEquipeHumana: empresaConfig?.contato_equipe_humana,
+      restricoes: empresaConfig?.restricoes,
+      observacoes: empresaConfig?.observacoes,
     });
 
     if (empresaConfig) {

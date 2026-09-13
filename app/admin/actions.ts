@@ -99,6 +99,8 @@ export async function salvarCliente(formData: FormData) {
       politica_troca_cancelamento: campoOuNull(formData, "politica_troca_cancelamento"),
       quando_transferir_humano: campoOuNull(formData, "quando_transferir_humano"),
       contato_equipe_humana: campoOuNull(formData, "contato_equipe_humana"),
+      restricoes: campoOuNull(formData, "restricoes"),
+      observacoes: campoOuNull(formData, "observacoes"),
       prompt_sistema: campoOuNull(formData, "prompt_sistema"),
     },
     { onConflict: "cliente_id" }

@@ -120,13 +120,21 @@ create table if not exists empresa_config (
   quando_transferir_humano text,
   contato_equipe_humana text,
   produtos_servicos text,          -- texto livre, reexibido no painel do cliente pra editar
+  diferenciais text,               -- por que o cliente deve escolher essa empresa
   faq text,                        -- idem
+  como_funciona_atendimento text,
+  restricoes text,                 -- coisas que a IA nunca deve fazer/prometer, específicas do negócio
+  observacoes text,
   prompt_sistema text              -- prompt final gerado a partir dessas informações
 );
 
 -- para bancos que já tinham a tabela `empresa_config` antes destas colunas existirem
 alter table empresa_config add column if not exists produtos_servicos text;
 alter table empresa_config add column if not exists faq text;
+alter table empresa_config add column if not exists diferenciais text;
+alter table empresa_config add column if not exists como_funciona_atendimento text;
+alter table empresa_config add column if not exists restricoes text;
+alter table empresa_config add column if not exists observacoes text;
 
 create table if not exists produtos (
   id uuid primary key default gen_random_uuid(),

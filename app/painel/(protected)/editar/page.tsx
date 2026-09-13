@@ -65,6 +65,15 @@ export default async function PainelEditarPage() {
           />
         </div>
         <div>
+          <label className={labelClass}>Diferenciais da empresa</label>
+          <textarea
+            name="diferenciais"
+            rows={2}
+            defaultValue={empresaConfig?.diferenciais ?? ""}
+            className={campoClass}
+          />
+        </div>
+        <div>
           <label className={labelClass}>Perguntas frequentes e respostas</label>
           <textarea name="faq" rows={4} defaultValue={empresaConfig?.faq ?? ""} className={campoClass} />
         </div>
@@ -94,6 +103,15 @@ export default async function PainelEditarPage() {
           />
         </div>
         <div>
+          <label className={labelClass}>Como funciona o atendimento/venda/agendamento</label>
+          <textarea
+            name="como_funciona_atendimento"
+            rows={2}
+            defaultValue={empresaConfig?.como_funciona_atendimento ?? ""}
+            className={campoClass}
+          />
+        </div>
+        <div>
           <label className={labelClass}>Quando transferir para humano</label>
           <textarea
             name="quando_transferir_humano"
@@ -107,6 +125,24 @@ export default async function PainelEditarPage() {
           <input
             name="contato_equipe_humana"
             defaultValue={empresaConfig?.contato_equipe_humana ?? ""}
+            className={campoClass}
+          />
+        </div>
+        <div>
+          <label className={labelClass}>O que a IA nunca deve fazer ou prometer</label>
+          <textarea
+            name="restricoes"
+            rows={2}
+            defaultValue={empresaConfig?.restricoes ?? ""}
+            className={campoClass}
+          />
+        </div>
+        <div>
+          <label className={labelClass}>Observações</label>
+          <textarea
+            name="observacoes"
+            rows={2}
+            defaultValue={empresaConfig?.observacoes ?? ""}
             className={campoClass}
           />
         </div>
