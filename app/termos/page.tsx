@@ -68,7 +68,7 @@ export default function TermosPage() {
           <h2 className={tituloClass}>5. Disponibilidade do serviço</h2>
           <p className={paragrafoClass}>
             O ZapIA depende de serviços de terceiros (Meta/WhatsApp, provedor de inteligência
-            artificial, Mercado Pago, infraestrutura de nuvem). Não garantimos disponibilidade
+            artificial, Stripe, infraestrutura de nuvem). Não garantimos disponibilidade
             ininterrupta e não nos responsabilizamos por indisponibilidade causada por esses
             terceiros.
           </p>
@@ -78,8 +78,8 @@ export default function TermosPage() {
           <h2 className={tituloClass}>6. Assinatura e cancelamento</h2>
           <p className={paragrafoClass}>
             O ZapIA é cobrado como assinatura mensal recorrente (R$47/mês, salvo alteração
-            comunicada previamente) via Mercado Pago. Você pode cancelar quando quiser diretamente
-            no Mercado Pago; o acesso permanece ativo até o fim do período já pago.
+            comunicada previamente) via Stripe. Você pode cancelar quando quiser direto pelo seu
+            painel; o acesso permanece ativo até o fim do período já pago.
           </p>
           <p className={paragrafoClass}>
             Garantia de 7 dias: se você não ficar satisfeita nos primeiros 7 dias após a primeira
@@ -100,8 +100,8 @@ export default function TermosPage() {
           <h2 className={tituloClass}>8. Dados e privacidade</h2>
           <p className={paragrafoClass}>
             Coletamos os dados necessários para operar o serviço (seus dados de cadastro,
-            conversas do seu assistente com clientes finais, dados de pagamento processados pelo
-            Mercado Pago). Não vendemos esses dados a terceiros. Você pode solicitar a exclusão dos
+            conversas do seu assistente com clientes finais, dados de pagamento processados pela
+            Stripe). Não vendemos esses dados a terceiros. Você pode solicitar a exclusão dos
             seus dados a qualquer momento pelo contato abaixo, nos termos da Lei Geral de Proteção
             de Dados (LGPD).
           </p>

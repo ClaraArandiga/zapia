@@ -50,9 +50,9 @@ create table if not exists pagamentos (
   id uuid primary key default gen_random_uuid(),
   created_at timestamptz not null default now(),
   lead_id uuid references leads(id) on delete set null,
-  mp_payment_id text not null unique,
+  mp_payment_id text not null unique,  -- legado do Mercado Pago; não é mais escrito pelo app
   mp_preference_id text,
-  status text not null,            -- approved / pending / rejected / etc (status bruto do Mercado Pago)
+  status text not null,
   valor numeric(10,2),
   raw_payload jsonb                -- payload completo da notificação, para auditoria/depuração
 );
@@ -61,11 +61,25 @@ create table if not exists assinaturas (
   id uuid primary key default gen_random_uuid(),
   created_at timestamptz not null default now(),
   lead_id uuid references leads(id) on delete set null,
-  mp_preapproval_id text not null unique,
-  status text not null,            -- pending / authorized / paused / cancelled (status bruto do Mercado Pago)
+  gateway_subscription_id text not null unique,  -- id da assinatura no gateway de pagamento (Stripe)
+  gateway_customer_id text,        -- id do cliente na Stripe, usado pra abrir o Portal de Cobrança
+  status text not null,            -- active / trialing / past_due / canceled / etc (status bruto do gateway)
   valor numeric(10,2),
   raw_payload jsonb                -- payload completo da notificação, para auditoria/depuração
 );
+
+-- renomeia a coluna de quem já tinha a tabela `assinaturas` da época do Mercado Pago
+do $$
+begin
+  if exists (
+    select 1 from information_schema.columns
+    where table_name = 'assinaturas' and column_name = 'mp_preapproval_id'
+  ) then
+    alter table assinaturas rename column mp_preapproval_id to gateway_subscription_id;
+  end if;
+end $$;
+
+alter table assinaturas add column if not exists gateway_customer_id text;
 
 create table if not exists onboarding_respostas (
   id uuid primary key default gen_random_uuid(),

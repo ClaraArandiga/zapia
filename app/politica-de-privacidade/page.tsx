@@ -16,7 +16,7 @@ export default function PoliticaDePrivacidadePage() {
           <p className={paragrafoClass}>
             Coletamos os dados que você fornece no cadastro e na implantação (nome, empresa,
             e-mail, WhatsApp de contato, informações do seu negócio), os dados de pagamento
-            processados pelo Mercado Pago, e o conteúdo das conversas trocadas entre seu
+            processados pela Stripe, e o conteúdo das conversas trocadas entre seu
             assistente de IA e seus clientes finais no WhatsApp, necessário para o funcionamento
             do serviço.
           </p>
@@ -37,7 +37,7 @@ export default function PoliticaDePrivacidadePage() {
           <p className={paragrafoClass}>
             Compartilhamos dados apenas com os provedores necessários para operar o serviço:
             Meta/WhatsApp (envio e recebimento de mensagens), o provedor de inteligência
-            artificial que gera as respostas, Mercado Pago (processamento de pagamento) e nossa
+            artificial que gera as respostas, Stripe (processamento de pagamento) e nossa
             infraestrutura de hospedagem e banco de dados. Não vendemos seus dados nem os dados
             dos seus clientes finais a terceiros.
           </p>

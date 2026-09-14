@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getSupabaseServiceClient } from "@/lib/supabase";
-import { criarAssinatura } from "@/lib/mercadopago";
+import { criarAssinatura } from "@/lib/stripe";
 
 const checkoutSchema = z.object({
   leadId: z.string().uuid(),
@@ -23,10 +23,9 @@ const TITULOS: Record<string, string> = {
   downsell: "ZapIA + Relatório Semanal",
 };
 
-// Chave de emergência: a conta do Mercado Pago ainda não está liberada pra
-// receber assinaturas (precisa virar Conta Negócio). Enquanto isso, pula o
-// pagamento e libera o cadastro direto. Reverte assim que MERCADOPAGO_ACCESS_TOKEN
-// estiver numa Conta Negócio: é só definir PAGAMENTO_HABILITADO=true na Vercel.
+// Chave de emergência: pula o gateway de pagamento e libera o cadastro direto.
+// Útil enquanto a integração de pagamento ainda está sendo validada. É só
+// definir PAGAMENTO_HABILITADO=true na Vercel para cobrar de verdade.
 const PAGAMENTO_HABILITADO = process.env.PAGAMENTO_HABILITADO === "true";
 
 export async function POST(request: Request) {
@@ -75,11 +74,11 @@ export async function POST(request: Request) {
     await supabase.from("assinaturas").upsert(
       {
         lead_id: lead.id,
-        mp_preapproval_id: `sem-pagamento-${lead.id}`,
-        status: "authorized",
+        gateway_subscription_id: `sem-pagamento-${lead.id}`,
+        status: "active",
         valor: preco,
       },
-      { onConflict: "mp_preapproval_id" }
+      { onConflict: "gateway_subscription_id" }
     );
 
     return NextResponse.json({ initPoint: `${siteUrl}/obrigado?lead=${lead.id}` });

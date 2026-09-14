@@ -21,7 +21,7 @@ function ObrigadoContent() {
       </h1>
       <p className="mt-4 text-white/60">
         {pendente
-          ? "Assim que a confirmação chegar do Mercado Pago, liberamos o próximo passo. Isso pode levar alguns minutos."
+          ? "Assim que a confirmação chegar da Stripe, liberamos o próximo passo. Isso pode levar alguns minutos."
           : "Agora vamos configurar sua IA. Precisamos de mais alguns detalhes técnicos sobre o WhatsApp e o funcionamento do seu atendimento."}
       </p>
 

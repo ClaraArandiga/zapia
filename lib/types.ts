@@ -23,7 +23,7 @@ export interface Assinatura {
   id: string;
   created_at: string;
   lead_id: string | null;
-  mp_preapproval_id: string;
+  gateway_subscription_id: string;
   status: string;
   valor: number | null;
 }

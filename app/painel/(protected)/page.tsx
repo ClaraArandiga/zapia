@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getSupabaseAuthClient } from "@/lib/supabase-server";
 import { getSupabaseServiceClient } from "@/lib/supabase";
 import { BotaoUpgrade } from "@/components/painel/BotaoUpgrade";
+import { BotaoGerenciarAssinatura } from "@/components/painel/BotaoGerenciarAssinatura";
 import { PausarIA } from "@/components/painel/PausarIA";
 
 const campo = (label: string, valor: string | null | undefined) => (
@@ -176,7 +177,7 @@ export default async function PainelPage({
 
       {sucesso === "upgrade" && (
         <p className="mt-4 rounded-xl border border-brand-500/30 bg-brand-500/10 p-3 text-sm text-brand-400">
-          Assinatura confirmada! O relatório aparece assim que o Mercado Pago liberar o pagamento
+          Assinatura confirmada! O relatório aparece assim que a Stripe liberar o pagamento
           (pode levar alguns minutos).
         </p>
       )}
@@ -207,10 +208,15 @@ export default async function PainelPage({
           {campo(
             "Assinatura",
             assinatura
-              ? `${assinatura.status === "authorized" ? "Ativa" : assinatura.status} · R$ ${assinatura.valor}/mês`
+              ? `${assinatura.status === "active" ? "Ativa" : assinatura.status} · R$ ${assinatura.valor}/mês`
               : "Aguardando confirmação"
           )}
         </dl>
+        {assinatura && (
+          <div className="mt-4">
+            <BotaoGerenciarAssinatura />
+          </div>
+        )}
       </section>
 
       {relatorio ? (

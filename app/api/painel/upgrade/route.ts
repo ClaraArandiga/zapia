@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getSupabaseAuthClient } from "@/lib/supabase-server";
 import { getSupabaseServiceClient } from "@/lib/supabase";
-import { cancelarAssinatura, criarAssinatura } from "@/lib/mercadopago";
+import { cancelarAssinatura, criarAssinatura } from "@/lib/stripe";
 
 const PRECOS: Record<string, number> = { upsell: 74, downsell: 54 };
 const TITULOS: Record<string, string> = {
@@ -10,8 +10,7 @@ const TITULOS: Record<string, string> = {
   downsell: "ZapIA + Relatório Semanal",
 };
 
-// Mesma chave de emergência do /api/checkout: pula o Mercado Pago enquanto a
-// conta não vira Conta Negócio. Reverte com PAGAMENTO_HABILITADO=true na Vercel.
+// Mesma chave de emergência do /api/checkout. Reverte com PAGAMENTO_HABILITADO=true na Vercel.
 const PAGAMENTO_HABILITADO = process.env.PAGAMENTO_HABILITADO === "true";
 
 const upgradeSchema = z.object({
@@ -62,28 +61,28 @@ export async function POST(request: Request) {
     await service.from("assinaturas").upsert(
       {
         lead_id: cliente.lead_id,
-        mp_preapproval_id: `sem-pagamento-${cliente.lead_id}`,
-        status: "authorized",
+        gateway_subscription_id: `sem-pagamento-${cliente.lead_id}`,
+        status: "active",
         valor: PRECOS[parsed.data.plano],
       },
-      { onConflict: "mp_preapproval_id" }
+      { onConflict: "gateway_subscription_id" }
     );
 
     return NextResponse.json({ initPoint: `${siteUrl}/painel?sucesso=upgrade` });
   }
 
-  // cancela a assinatura atual, se houver uma pendente/autorizada, antes de criar a nova
+  // cancela a assinatura atual, se houver uma ativa/pendente, antes de criar a nova
   const { data: assinaturaAtual } = await service
     .from("assinaturas")
-    .select("mp_preapproval_id, status")
+    .select("gateway_subscription_id, status")
     .eq("lead_id", cliente.lead_id)
     .order("created_at", { ascending: false })
     .limit(1)
     .maybeSingle();
 
-  if (assinaturaAtual && ["authorized", "pending"].includes(assinaturaAtual.status)) {
+  if (assinaturaAtual && ["active", "trialing", "past_due"].includes(assinaturaAtual.status)) {
     try {
-      await cancelarAssinatura(assinaturaAtual.mp_preapproval_id);
+      await cancelarAssinatura(assinaturaAtual.gateway_subscription_id);
     } catch (err) {
       console.error("Erro ao cancelar assinatura anterior no upgrade:", err);
     }

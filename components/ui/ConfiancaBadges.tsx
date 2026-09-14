@@ -7,7 +7,7 @@ const itens = [
   {
     icone: "🔒",
     titulo: "Pagamento 100% seguro",
-    texto: "Processado pelo Mercado Pago, a maior plataforma de pagamentos da América Latina.",
+    texto: "Processado pela Stripe, usada por milhões de empresas em todo o mundo.",
   },
 ];
 
