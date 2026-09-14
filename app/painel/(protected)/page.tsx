@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getSupabaseAuthClient } from "@/lib/supabase-server";
 import { getSupabaseServiceClient } from "@/lib/supabase";
 import { BotaoUpgrade } from "@/components/painel/BotaoUpgrade";
+import { PausarIA } from "@/components/painel/PausarIA";
 
 const campo = (label: string, valor: string | null | undefined) => (
   <div>
@@ -318,6 +319,8 @@ export default async function PainelPage({
           {campo("Contato da equipe humana", empresaConfig?.contato_equipe_humana)}
         </dl>
       </section>
+
+      <PausarIA ativo={cliente!.ativo} />
     </div>
   );
 }

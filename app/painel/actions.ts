@@ -110,3 +110,21 @@ export async function salvarInformacoes(formData: FormData) {
   revalidatePath("/painel/editar");
   redirect("/painel?sucesso=1");
 }
+
+export async function pausarIA() {
+  const cliente = await exigirCliente();
+  const service = getSupabaseServiceClient();
+
+  await service.from("clientes").update({ ativo: false }).eq("id", cliente.id);
+
+  revalidatePath("/painel");
+}
+
+export async function retomarIA() {
+  const cliente = await exigirCliente();
+  const service = getSupabaseServiceClient();
+
+  await service.from("clientes").update({ ativo: true }).eq("id", cliente.id);
+
+  revalidatePath("/painel");
+}
